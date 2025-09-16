@@ -1,13 +1,10 @@
 import DebugFloorMaterial from "../Materials/DebugFloor";
 import * as THREE from "three";
+import ExperienceObject from "./ExperienceObject";
 
-export default class DebugFloor {
-  constructor({ scene, debug }) {
-    this.scene = scene;
-    this.debug = debug;
-
-    this.init();
-    this.initDebug();
+export default class DebugFloor extends ExperienceObject {
+  constructor() {
+    super();
   }
 
   initDebug() {
@@ -39,8 +36,10 @@ export default class DebugFloor {
   }
 
   init() {
+    this.initDebug();
+
     this.material = DebugFloorMaterial();
-    this.geometry = new THREE.PlaneGeometry(4, 4);
+    this.geometry = new THREE.PlaneGeometry(10, 10);
     this.geometry.rotateX(-Math.PI * 0.5);
     this.mesh = new THREE.Mesh(this.geometry, this.material);
     this.scene.add(this.mesh);

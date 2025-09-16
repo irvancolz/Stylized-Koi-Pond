@@ -3,8 +3,6 @@ import Camera from "./Camera";
 import Renderer from "./Renderer";
 import Light from "./Light";
 import Debugger from "./Debugger";
-import World from "./World/World";
-import ResourcesLoader from "./Utils/ResourcesLoader";
 import States from "./States";
 
 let instance = null;
@@ -15,6 +13,8 @@ export default class Experience {
       return instance;
     }
     instance = this;
+
+    this.started = false;
 
     this.debug = new Debugger();
     this.states = new States();
@@ -36,15 +36,13 @@ export default class Experience {
       camera: this.camera.instance,
     });
 
-    this.resources = new ResourcesLoader([]);
-
-    this.world = new World({ scene: this.scene, debug: this.debug });
-
     this.states.time.on("tick", () => {
+      if (this.world) {
+        this.world.update();
+      }
       // on tick
       this.camera.update();
       this.renderer.update();
-      this.world.update();
     });
 
     this.states.sizes.on("resize", () => {
@@ -52,5 +50,21 @@ export default class Experience {
       this.camera.resize();
       this.renderer.resize();
     });
+  }
+
+  init() {
+    this.started = true;
+    this.world.init();
+  }
+
+  dispose() {
+    this.world.dispose();
+    this.started = false;
+  }
+
+  setWorld(world) {
+    this.world = world;
+    this.world.setScene(this.scene);
+    this.world.setDebug(this.debug);
   }
 }
