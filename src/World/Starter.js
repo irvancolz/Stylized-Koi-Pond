@@ -1,27 +1,18 @@
 import * as THREE from "three";
-import ExperienceObject from "./ExperienceObject";
+import Entities from "./ExperienceObject";
 
-class Starter extends ExperienceObject {
+class Starter extends Entities {
   constructor() {
     super();
-    this.pos = 0;
-    this.radius = 2.5;
-
-    this.geometry = new THREE.BoxGeometry();
-    this.geometry.translate(0, 0.51, 0);
-
-    this.material = new THREE.MeshBasicMaterial();
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
   }
 
   init() {
-    this.scene.add(this.mesh);
+    this.ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshBasicMaterial({ color: '#000000' }))
+    this.ground.rotateX(-Math.PI * .5)
+    this.Graphics.Scene.add(this.ground)
   }
-  update() {
-    this.pos += 0.02;
 
-    this.mesh.position.x = Math.sin(this.pos) * this.radius;
-    this.mesh.position.z = Math.cos(this.pos) * this.radius;
+  update() {
   }
 }
 

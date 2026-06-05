@@ -1,19 +1,21 @@
-class ExperienceObject {
-  constructor() {}
+class Entities {
+  constructor() { }
 
-  setScene(scene) {
-    this.scene = scene;
+  setGraphics(graphic) {
+    this.Graphics = graphic;
   }
 
   setDebug(debug) {
-    this.debug = debug;
+    this.Debug = debug;
   }
 
-  update() {}
+  update() { }
 
-  dispose() {}
+  dispose() { }
 
-  init() {}
+  init() { }
+
+  registerDebugger() { }
 }
 
-export default ExperienceObject;
+export default Entities;

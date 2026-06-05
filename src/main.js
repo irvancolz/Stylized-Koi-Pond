@@ -1,19 +1,37 @@
 import Experience from "./Experience";
 import "./style.css";
-import World from "./World/World";
-import DebugFloor from "./World/DebugFloor";
 import Starter from "./World/Starter";
-const canvas = document.getElementById("canvas");
+import Fish from "./World/Fish";
+import Debugger from "./Debugger";
 
-const world = new World();
-const floor = new DebugFloor();
-world.add(floor);
+const canvas = document.getElementById("canvas");
+const debug = new Debugger()
+const experience = new Experience(canvas, debug);
+
+const FISH_CONFIG = {
+  maxSpeed: .02,
+  maxSteering: .01
+}
+
+const schools = []
+const FISH_COUNT = 150;
+for (let i = 0; i < FISH_COUNT; i++) {
+  const fish = new Fish(FISH_CONFIG)
+  schools.push(fish)
+}
+experience.addFish(schools)
 
 const starter = new Starter();
-world.add(starter);
-
-const experience = new Experience(canvas);
-experience.setWorld(world);
+experience.addEntity(starter);
 
 experience.init();
 window.experience = experience;
+
+// register Debugger
+if (debug.active) {
+  experience.registerDebugger()
+
+  const fishDebugger = debug.ui.addFolder({ title: 'fish' })
+  fishDebugger.addBinding(FISH_CONFIG, 'maxSpeed', { min: .01, max: .2, step: .01 })
+  fishDebugger.addBinding(FISH_CONFIG, 'maxSteering', { min: .001, max: .01, step: .010 })
+}

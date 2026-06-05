@@ -1,70 +1,112 @@
-import * as THREE from "three";
-import Camera from "./Camera";
-import Renderer from "./Renderer";
-import Light from "./Light";
-import Debugger from "./Debugger";
 import States from "./States";
+import Graphics from "./Graphics";
 
 let instance = null;
 
 export default class Experience {
-  constructor(canvas) {
+  constructor(canvas, debug) {
     if (instance) {
       return instance;
     }
     instance = this;
-
-    this.started = false;
-
-    this.debug = new Debugger();
-    this.states = new States();
+    this.debug = debug
     this.canvas = canvas;
-    this.scene = new THREE.Scene();
+    this.started = false;
+    this.fishes = []
+    // non-fish object
+    this.entities = []
 
-    this.camera = new Camera({
-      scene: this.scene,
-      sizes: this.states.sizes,
-      canvas: this.canvas,
-    });
-
-    this.light = new Light({ scene: this.scene, debug: this.debug });
-
-    this.renderer = new Renderer({
-      scene: this.scene,
-      sizes: this.states.sizes,
-      canvas: this.canvas,
-      camera: this.camera.instance,
-    });
+    this.states = new States();
+    this.Graphics = new Graphics(canvas)
 
     this.states.time.on("tick", () => {
-      if (this.world) {
-        this.world.update();
-      }
       // on tick
-      this.camera.update();
-      this.renderer.update();
+      this.update()
+      this.Graphics.update()
     });
 
     this.states.sizes.on("resize", () => {
       // on resize
-      this.camera.resize();
-      this.renderer.resize();
+      this.Graphics.resize()
     });
+  }
+
+  dispose() {
+    this.started = false;
+
+    for (let e = 0; e < this.entities.length; e++) {
+      const entity = this.entities[e]
+      entity.dispose()
+    }
+
+    for (let f = 0; f < this.fishes.length; f++) {
+      const fish = this.fishes[f]
+      fish.dispose(this.fishes)
+    }
+
+  }
+  update() {
+    for (let e = 0; e < this.entities.length; e++) {
+      const entity = this.entities[e]
+      entity.update()
+    }
+
+    for (let f = 0; f < this.fishes.length; f++) {
+      const fish = this.fishes[f]
+      fish.update(this.fishes)
+    }
+
   }
 
   init() {
     this.started = true;
-    this.world.init();
+
+    for (let e = 0; e < this.entities.length; e++) {
+      const entity = this.entities[e]
+      entity.setGraphics(this.Graphics)
+      entity.setDebug(this.debug)
+      entity.init()
+    }
+
+    for (let f = 0; f < this.fishes.length; f++) {
+      const fish = this.fishes[f]
+      fish.setGraphics(this.Graphics)
+      fish.setDebug(this.debug)
+      fish.init()
+    }
   }
 
-  dispose() {
-    this.world.dispose();
-    this.started = false;
+  addFish(entities) {
+    if (Array.isArray(entities)) {
+      for (let i = 0; i < entities.length; i++) {
+        this.addFish(entities[i])
+      }
+    } else {
+      this.fishes.push(entities)
+    }
   }
 
-  setWorld(world) {
-    this.world = world;
-    this.world.setScene(this.scene);
-    this.world.setDebug(this.debug);
+  addEntity(entities) {
+    if (Array.isArray(entities)) {
+      for (let i = 0; i < entities.length; i++) {
+        this.addEntity(entities[i])
+      }
+    } else {
+      this.entities.push(entities)
+    }
+  }
+
+  registerDebugger() {
+
+    for (let e = 0; e < this.entities.length; e++) {
+      const entity = this.entities[e]
+      entity.registerDebugger()
+    }
+
+    for (let f = 0; f < this.fishes.length; f++) {
+      const fish = this.fishes[f]
+      fish.registerDebugger()
+    }
+
   }
 }
