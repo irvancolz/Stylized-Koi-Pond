@@ -5,6 +5,14 @@ class Entities {
     this.Graphics = graphic;
   }
 
+  setStates(res) {
+    this.States = res;
+  }
+
+  setResources(res) {
+    this.Resources = res;
+  }
+
   setDebug(debug) {
     this.Debug = debug;
   }

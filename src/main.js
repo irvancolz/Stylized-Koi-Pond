@@ -3,13 +3,15 @@ import "./style.css";
 import Starter from "./World/Starter";
 import Fish from "./World/Fish";
 import Debugger from "./Debugger";
+import ResourcesLoader from "./Utils/ResourcesLoader";
+import resources from "./resources";
 
 const canvas = document.getElementById("canvas");
 const debug = new Debugger()
 const experience = new Experience(canvas, debug);
 
 const FISH_CONFIG = {
-  maxSpeed: .02,
+  maxSpeed: .01,
   maxSteering: .01
 }
 
@@ -19,13 +21,16 @@ for (let i = 0; i < FISH_COUNT; i++) {
   const fish = new Fish(FISH_CONFIG)
   schools.push(fish)
 }
-experience.addFish(schools)
+// experience.addFish(schools)
 
 const starter = new Starter();
 experience.addEntity(starter);
 
-experience.init();
-window.experience = experience;
+const loader = new ResourcesLoader(resources)
+loader.on('finish:loaded', () => {
+  experience.init(loader.resources);
+  window.experience = experience;
+})
 
 // register Debugger
 if (debug.active) {

@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import States from "./States";
 import Graphics from "./Graphics";
 
@@ -11,13 +12,14 @@ export default class Experience {
     instance = this;
     this.debug = debug
     this.canvas = canvas;
+    this.resources = {}
     this.started = false;
     this.fishes = []
     // non-fish object
     this.entities = []
 
     this.states = new States();
-    this.Graphics = new Graphics(canvas)
+    this.Graphics = new Graphics(canvas, debug)
 
     this.states.time.on("tick", () => {
       // on tick
@@ -46,6 +48,8 @@ export default class Experience {
 
   }
   update() {
+    const delta = this.states.time.delta
+
     for (let e = 0; e < this.entities.length; e++) {
       const entity = this.entities[e]
       entity.update()
@@ -53,18 +57,21 @@ export default class Experience {
 
     for (let f = 0; f < this.fishes.length; f++) {
       const fish = this.fishes[f]
-      fish.update(this.fishes)
+      fish.update(delta, this.fishes)
     }
 
   }
 
-  init() {
+  init(res) {
     this.started = true;
+    this.resources = res
 
     for (let e = 0; e < this.entities.length; e++) {
       const entity = this.entities[e]
       entity.setGraphics(this.Graphics)
       entity.setDebug(this.debug)
+      entity.setResources(res)
+      entity.setStates(this.states)
       entity.init()
     }
 
@@ -72,8 +79,12 @@ export default class Experience {
       const fish = this.fishes[f]
       fish.setGraphics(this.Graphics)
       fish.setDebug(this.debug)
+      fish.setResources(res)
+      fish.setStates(this.states)
       fish.init()
     }
+
+    this.Graphics.initEffects()
   }
 
   addFish(entities) {
@@ -97,6 +108,7 @@ export default class Experience {
   }
 
   registerDebugger() {
+    this.Graphics.registerDebugger()
 
     for (let e = 0; e < this.entities.length; e++) {
       const entity = this.entities[e]

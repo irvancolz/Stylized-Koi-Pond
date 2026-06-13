@@ -20,5 +20,13 @@ export const math = (function() {
     sat: function(x) {
       return Math.min(Math.max(x, 0.0), 1.0);
     },
+    smoothstep: function(edge0, edge1, x) {
+      const t = Math.max(0, Math.min(1, (x - edge0) / (edge1 - edge0)));
+      return t * t * (3 - 2 * t);
+    },
+    normalize: function(value) {
+      if (value === 0) return 0;
+      return value / Math.abs(value);
+    }
   };
 })();
