@@ -31,9 +31,15 @@ class Fish extends Entities {
     this._mesh.traverse(el => {
       if (el.isMesh) {
         el.isFish = true
+
+        const idx = this._id % 6 + 1
+        const map = this.Resources[`koi_pattern_0${idx}`]
+        map.colorSpace = THREE.SRGBColorSpace
+        map.flipY = false
+
+        el.material = new THREE.MeshStandardMaterial({ color: el.material.color, map, side: THREE.DoubleSide })
         el.castShadow = true
         el.receiveShadow = true
-        // el.material = new THREE.MeshBasicMaterial({ color: this._id == 1 ? 0xff00 : 0xffffff, side: THREE.DoubleSide })
       }
       if (el.type == 'Bone') this._bones[el.name] = {
         bones: el,
@@ -145,69 +151,6 @@ class Fish extends Entities {
       this._velocity.multiplyScalar(this._maxSpeed)
     }
 
-  }
-
-  _registerEvents() {
-    window.addEventListener('keydown', e => {
-      let type = ''
-
-      if (e.code == 'KeyA') {
-        type = 'left'
-      } else if (e.code == 'KeyD') {
-        type = 'right'
-      } else {
-        type = ''
-      }
-      if (type != '') {
-        const dirMult = type == 'left' ? 1 : -1
-        const dirIntensity = 1
-        for (const key in this._bones) {
-          console.log(this._bones[key].bones.name)
-        }
-
-        // animate bones
-        // gsap.to(this._bones["Cauldal_Top"].bones.rotation, {
-        //   z: dirMult * Math.PI * .13,
-        //   duration: .3,
-        //   ease: "power1.out"
-        // })
-        // gsap.to(this._bones["Cauldal_Bot"].bones.rotation, {
-        //   z: dirMult * Math.PI * .15,
-        //   duration: .3,
-        //   ease: "power1.out"
-        // })
-        // gsap.to(this._bones["Head"].bones.rotation, {
-        //   z: dirMult * Math.PI * .04,
-        //   duration: .3,
-        //   ease: "power1.out"
-        // })
-        //
-        // for (let i = 0; i < 2; i++) {
-        //   gsap.to(this._bones[`Cauldal${i == 0 ? '' : `00${i}`}`].bones.rotation, {
-        //     z: dirMult * Math.PI * .15,
-        //     duration: .3,
-        //     ease: "power1.out"
-        //   })
-        // }
-        // if (type == 'left') {
-        //
-        //   this._bones["Pectoral_L"].rotateZ(Math.PI * .5)
-        //   this._bones["Pectoral_R"].rotation.z = 0
-        // } else {
-        //
-        //   this._bones["Pectoral_R"].rotateZ(-Math.PI * .5)
-        //   this._bones["Pectoral_L"].rotation.z = 0
-        // }
-        //
-
-        // gsap.to(this._bones["Anal_L"].rotation, {
-        //   z: dirMult * -Math.PI * .01,
-        //   duration: .3,
-        //   ease: "power1.out"
-        // })
-      }
-
-    })
   }
 
   _animateHead(dir, intensity) {

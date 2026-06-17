@@ -53,7 +53,7 @@ export default class Graphic {
 
   _InitLightning() {
     this.Sun = new THREE.DirectionalLight(0xffffff, this._sun.intensity)
-    this.Sun.position.set(.3, 1, 0).multiplyScalar(10)
+    this.Sun.position.set(.5, 1, 0.3).multiplyScalar(10)
     this.Sun.shadow.camera.top = 20;
     this.Sun.shadow.camera.bottom = -20;
     this.Sun.shadow.camera.right = 20;

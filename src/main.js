@@ -25,7 +25,7 @@ for (let i = 0; i < FISH_COUNT; i++) {
 experience.addFish(schools)
 
 const water = new Water()
-// experience.addEntity(water)
+experience.addEntity(water)
 
 const starter = new Starter();
 experience.addEntity(starter);
