@@ -4,9 +4,14 @@ import { OrbitControls } from 'three/examples/jsm/Addons.js'
 export default class Graphic {
   constructor(canvas, debug) {
 
-    this.config = {
-      uShadowTresshold: new THREE.Uniform(.01),
-      uShadowColIntensity: new THREE.Uniform(.5)
+    this._sun = {
+      intensity: 1.4
+    }
+
+    this._water = {
+      uWaterHeight: new THREE.Uniform(.66),
+      uWaterColor: new THREE.Uniform(new THREE.Color('#17cf9f')),
+      uFoamWidth: new THREE.Uniform(.03)
     }
 
     this.$canvas = canvas
@@ -25,8 +30,8 @@ export default class Graphic {
 
   _InitCamera() {
     this.Camera = new THREE.PerspectiveCamera(35, this.sizes.width / this.sizes.height, 1, 100)
-    this.Camera.position.y = 2
-    this.Camera.position.x = 10
+    this.Camera.position.y = 30
+    // this.Camera.position.x = 10
     this.Scene.add(this.Camera)
 
     this.Controls = new OrbitControls(this.Camera, this.$canvas)
@@ -47,59 +52,108 @@ export default class Graphic {
   }
 
   _InitLightning() {
-    this.Sun = new THREE.DirectionalLight(0xffffff, 10)
-    this.Sun.position.set(1, 1, 1).multiplyScalar(5)
+    this.Sun = new THREE.DirectionalLight(0xffffff, this._sun.intensity)
+    this.Sun.position.set(.3, 1, 0).multiplyScalar(10)
+    this.Sun.shadow.camera.top = 20;
+    this.Sun.shadow.camera.bottom = -20;
+    this.Sun.shadow.camera.right = 20;
+    this.Sun.shadow.camera.left = -20;
+    this.Sun.shadow.camera.far = 20;
+    this.Sun.shadow.camera.near = 1;
+    this.Sun.shadow.mapSize.set(2048, 2048);
+    this.Sun.shadow.bias = -0.01;
+    this.Sun.castShadow = true;
     this.Scene.add(this.Sun)
 
-    this.Ambient = new THREE.AmbientLight(0xffffff, 10)
-    // this.Scene.add(this.Ambient)
+    const _ShadowHelper = new THREE.CameraHelper(this.Sun.shadow.camera)
+    // this.Scene.add(_ShadowHelper)
+
+    this.Ambient = new THREE.AmbientLight(0xffffff, 1)
+    this.Scene.add(this.Ambient)
   }
 
   initEffects() {
     // here is where i hijack the material
+    const custVertParIncl = `
+    #include <common>
+
+    varying vec3 vWorldPosition;
+    `
+
+    const custVertIncl = `
+    #include <fog_vertex>
+  
+    vWorldPosition = worldPosition.xyz;
+  `
     const custFragParIncl = `
     #include <common>
 
-    uniform float uShadowTresshold;
-    uniform float uShadowColIntensity;
+    uniform float uWaterHeight;
+    uniform vec3 uWaterColor;
+    uniform float uFoamWidth;
 
-    float getLuminance(vec3 color) {
-     return dot(color, vec3(0.2126, 0.7152, 0.0722));
+    varying vec3 vWorldPosition;
+
+    float plot(float st, float pct){
+      return  smoothstep( pct-uFoamWidth, pct, st) -
+              smoothstep( pct, pct+uFoamWidth,  st);
     }
+
     `
 
     const custFragIncl = `
-    #ifdef OPAQUE
-      diffuseColor.a = 1.0;
+    #include <color_fragment>
+   
+    float y = vWorldPosition.y;
+    float h = y - uWaterHeight;
+    h = smoothstep(-.015, 0., h);
+    vec3 c = mix(uWaterColor, diffuseColor.rgb, h);
+
+    float ft = .2;
+    vec3 foamCol = vec3(1.);
+    float fh = plot(y, uWaterHeight);
+    c = mix(c, foamCol, fh);
+    
+    #if  defined(IS_FISH)
+      diffuseColor.rgb = diffuseColor.rgb;
+    #else
+      diffuseColor.rgb = c;
     #endif
-    #ifdef USE_TRANSMISSION
-      diffuseColor.a *= material.transmissionAlpha;
-    #endif
-
-    // inject custom toon shading
-    float l = getLuminance(outgoingLight);
-   vec3 shadowColor = diffuseColor.rgb * uShadowColIntensity;
-   float intensity = step(uShadowTresshold, l);
-
-   outgoingLight = mix(shadowColor * (1. -l), diffuseColor.rgb, intensity);
-
-    gl_FragColor = vec4( outgoingLight, diffuseColor.a );
   `
 
-    this.Scene.traverse(el => {
-      if (el.isMesh) {
-        el.material.onBeforeCompile = (shader) => {
+    const swapToMeshToonMaterial = (el) => {
+      if (!el.isMesh) return
+      if (!el.material.isMeshStandardMaterial) return
+      el.material = new THREE.MeshToonMaterial({
+        map: el.material.map,
+        color: el.material.color,
+        side: THREE.DoubleSide
+      })
 
-          shader.uniforms = { ...shader.uniforms, ...this.config }
-
-          shader.fragmentShader = shader.fragmentShader.replace('#include <common>', custFragParIncl)
-          shader.fragmentShader = shader.fragmentShader.replace('#include <opaque_fragment>', custFragIncl)
-          //
-          console.log(shader.uniforms)
-          console.log(shader.fragmentShader)
-        }
+      el.material.defines = {
+        ...el.material.defines,
       }
-    })
+
+      if (el.isFish) el.material.defines.IS_FISH = ''
+
+      el.material.onBeforeCompile = (shader) => {
+        shader.uniforms = { ...shader.uniforms, ...this._water }
+
+        shader.vertexShader = shader.vertexShader.replace('#include <common>', custVertParIncl)
+        shader.vertexShader = shader.vertexShader.replace('#include <fog_vertex>', custVertIncl)
+
+        shader.fragmentShader = shader.fragmentShader.replace('#include <common>', custFragParIncl)
+        shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>', custFragIncl)
+
+      }
+
+
+      el.receiveShadow = true
+      el.castShadow = true
+
+    }
+
+    this.Scene.traverse(swapToMeshToonMaterial)
 
   }
 
@@ -113,9 +167,19 @@ export default class Graphic {
   registerDebugger() {
     if (!this.debug.active) return
 
-    const f = this.debug.ui.addFolder({ title: 'effects' })
-    f.addBinding(this.config.uShadowTresshold, 'value', { min: .01, max: .45, step: .01, label: 'shadow tresshold' })
-    f.addBinding(this.config.uShadowColIntensity, 'value', { min: .1, max: .75, step: .01, label: 'shadow intensity' })
+    const sun = this.debug.ui.addFolder({ title: 'lights' })
+    sun.addBinding(this._sun, 'intensity', { min: .1, max: 10, step: .1, label: 'sun' }).on('change', () => this.Sun.intensity = this._sun.intensity)
+    sun.addBinding(this.Ambient, 'intensity', { min: .1, max: 5, step: .1, label: 'ambient' })
+
+    const w = {
+      color: '#' + this._water.uWaterColor.value.getHexString()
+    }
+    const water = this.debug.ui.addFolder({ title: 'water' })
+    water.addBinding(this._water.uWaterHeight, 'value', { min: 0, max: 3, step: .01, label: 'height' })
+    water.addBinding(this._water.uFoamWidth, 'value', { min: 0.01, max: .1, step: .001, label: 'foam' })
+    water.addBinding(w, 'color').on('change', () => {
+      this._water.uWaterColor.value.set(w.color)
+    })
 
   }
 

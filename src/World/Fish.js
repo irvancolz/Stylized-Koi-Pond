@@ -4,7 +4,7 @@ import { math } from '../Utils/math';
 import { SkeletonUtils } from 'three/examples/jsm/Addons.js';
 
 const TURN_ANIMATION_INTENSITY_MIN = .001
-const SPREAD = 10
+const SPREAD = 9
 let id = 0
 
 class Fish extends Entities {
@@ -16,7 +16,7 @@ class Fish extends Entities {
     this._tl = {}
     this._bones = {}
     const r = SPREAD
-    this._position = new THREE.Vector3(math.rand_range(-r, r), 1, math.rand_range(-r, r))
+    this._position = new THREE.Vector3(math.rand_range(-r, r), math.rand_range(.0, .5), math.rand_range(-r, r))
     this._velocity = new THREE.Vector3(math.rand_range(-1, 1), 0, math.rand_range(-1, 1))
   }
 
@@ -30,7 +30,10 @@ class Fish extends Entities {
 
     this._mesh.traverse(el => {
       if (el.isMesh) {
-        el.material = new THREE.MeshBasicMaterial({ color: this._id == 1 ? 0xff00 : 0xffffff, side: THREE.DoubleSide })
+        el.isFish = true
+        el.castShadow = true
+        el.receiveShadow = true
+        // el.material = new THREE.MeshBasicMaterial({ color: this._id == 1 ? 0xff00 : 0xffffff, side: THREE.DoubleSide })
       }
       if (el.type == 'Bone') this._bones[el.name] = {
         bones: el,

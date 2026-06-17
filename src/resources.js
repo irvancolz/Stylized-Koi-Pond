@@ -8,6 +8,16 @@ const models = [
     name: 'statue_model',
     type: 'gltfModel',
     path: './Statue.glb'
+  },
+  {
+    name: 'world_model',
+    type: 'gltfModel',
+    path: './Environment.glb'
+  },
+  {
+    name: 'michelle_model',
+    type: 'gltfModel',
+    path: './Michelle.glb'
   }
 
 ]

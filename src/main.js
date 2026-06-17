@@ -5,6 +5,7 @@ import Fish from "./World/Fish";
 import Debugger from "./Debugger";
 import ResourcesLoader from "./Utils/ResourcesLoader";
 import resources from "./resources";
+import Water from "./World/Water";
 
 const canvas = document.getElementById("canvas");
 const debug = new Debugger()
@@ -16,12 +17,15 @@ const FISH_CONFIG = {
 }
 
 const schools = []
-const FISH_COUNT = 150;
+const FISH_COUNT = 40;
 for (let i = 0; i < FISH_COUNT; i++) {
   const fish = new Fish(FISH_CONFIG)
   schools.push(fish)
 }
-// experience.addFish(schools)
+experience.addFish(schools)
+
+const water = new Water()
+// experience.addEntity(water)
 
 const starter = new Starter();
 experience.addEntity(starter);
