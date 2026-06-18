@@ -4,7 +4,7 @@ import Entities from "./ExperienceObject";
 export default class Water extends Entities {
   constructor() {
     super()
-    const size = 20
+    const size = 30
 
     this._uniforms = {
       uTime: new THREE.Uniform(0)
@@ -99,6 +99,9 @@ export default class Water extends Entities {
   update() {
     if (this.States) {
       this._uniforms.uTime.value = this.States.time.elapsed
+    }
+    if (this.Graphics) {
+      this._mesh.position.y = this.Graphics._water.uWaterHeight.value
     }
   }
 }

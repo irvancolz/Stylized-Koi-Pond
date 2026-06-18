@@ -15,9 +15,24 @@ const models = [
     path: './Environment.glb'
   },
   {
-    name: 'michelle_model',
+    name: 'lotusleaves_model',
     type: 'gltfModel',
-    path: './Michelle.glb'
+    path: './LotusLeaves.glb'
+  },
+  {
+    name: 'lotusflower_model',
+    type: 'gltfModel',
+    path: './LotusFlower.glb'
+  },
+  {
+    name: 'ground_model',
+    type: 'gltfModel',
+    path: './Ground.glb'
+  },
+  {
+    name: 'pinetree_model',
+    type: 'gltfModel',
+    path: './PineTree.glb'
   }
 
 ]

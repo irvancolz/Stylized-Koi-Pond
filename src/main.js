@@ -6,6 +6,12 @@ import Debugger from "./Debugger";
 import ResourcesLoader from "./Utils/ResourcesLoader";
 import resources from "./resources";
 import Water from "./World/Water";
+import seed from './seed.json'
+import PineTree from "./World/PineTree";
+import Ground from "./World/Ground";
+import LotusLeaves from "./World/LotusLeaves";
+import LotusFlower from "./World/LotusFlower";
+import Fountain from "./World/Fountain";
 
 const canvas = document.getElementById("canvas");
 const debug = new Debugger()
@@ -24,11 +30,27 @@ for (let i = 0; i < FISH_COUNT; i++) {
 }
 experience.addFish(schools)
 
+const fountain = new Fountain()
+experience.addEntity(fountain)
+
+const ground = new Ground()
+experience.addEntity(ground)
+
+const lotusleaves = new LotusLeaves()
+experience.addEntity(lotusleaves)
+
+const lotusflower = new LotusFlower()
+experience.addEntity(lotusflower)
+
 const water = new Water()
 experience.addEntity(water)
 
+const pineReffs = seed.filter(el => el.name.toLowerCase().includes('pinetree'))
+const pineTree = new PineTree(pineReffs)
+experience.addEntity(pineTree);
+
 const starter = new Starter();
-experience.addEntity(starter);
+// experience.addEntity(starter);
 
 const loader = new ResourcesLoader(resources)
 loader.on('finish:loaded', () => {
