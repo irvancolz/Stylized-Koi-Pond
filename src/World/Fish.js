@@ -34,9 +34,6 @@ class Fish extends Entities {
 
         const idx = this._id % 6 + 1
         const map = this.Resources[`koi_pattern_0${idx}`]
-        map.colorSpace = THREE.SRGBColorSpace
-        map.flipY = false
-
         el.material = new THREE.MeshStandardMaterial({ color: el.material.color, map, side: THREE.DoubleSide })
         el.castShadow = true
         el.receiveShadow = true

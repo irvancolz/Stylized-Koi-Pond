@@ -1,3 +1,5 @@
+import * as THREE from 'three'
+
 const models = [
   {
     name: 'fish_model',
@@ -36,32 +38,57 @@ const textures = [
   {
     name: 'koi_pattern_01',
     type: 'texture',
-    path: './texture/KoiPattern01.jpg'
+    path: './texture/KoiPattern01.jpg',
+    onLoaded: (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace
+      tex.flipY = false
+    }
   },
   {
     name: 'koi_pattern_02',
     type: 'texture',
-    path: './texture/KoiPattern02.jpg'
+    path: './texture/KoiPattern02.jpg',
+    onLoaded: (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace
+      tex.flipY = false
+    }
   },
   {
     name: 'koi_pattern_03',
     type: 'texture',
-    path: './texture/KoiPattern03.jpg'
+    path: './texture/KoiPattern03.jpg',
+    onLoaded: (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace
+      tex.flipY = false
+    }
   },
   {
     name: 'koi_pattern_04',
     type: 'texture',
-    path: './texture/KoiPattern04.jpg'
+    path: './texture/KoiPattern04.jpg',
+    onLoaded: (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace
+      tex.flipY = false
+    }
   },
   {
     name: 'koi_pattern_05',
     type: 'texture',
-    path: './texture/KoiPattern05.jpg'
+    path: './texture/KoiPattern05.jpg',
+    onLoaded: (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace
+      tex.flipY = false
+
+    }
   },
   {
     name: 'koi_pattern_06',
     type: 'texture',
-    path: './texture/KoiPattern06.jpg'
+    path: './texture/KoiPattern06.jpg',
+    onLoaded: (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace
+      tex.flipY = false
+    }
   },
 ]
 

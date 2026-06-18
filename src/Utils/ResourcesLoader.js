@@ -42,6 +42,10 @@ export default class ResourcesLoader extends EventEmitter {
     this.resources[src.name] = file;
     this.loaded++;
 
+    if (src.onLoaded) {
+      src.onLoaded(file);
+    }
+
     if (this.loaded == this.total) {
       this.trigger("finish:loaded");
     }
