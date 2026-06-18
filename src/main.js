@@ -12,6 +12,10 @@ import Ground from "./World/Ground";
 import LotusLeaves from "./World/LotusLeaves";
 import LotusFlower from "./World/LotusFlower";
 import Fountain from "./World/Fountain";
+import Loading from "./Loading";
+
+const loading = new Loading()
+loading.start()
 
 const canvas = document.getElementById("canvas");
 const debug = new Debugger()
@@ -56,6 +60,7 @@ const loader = new ResourcesLoader(resources)
 loader.on('finish:loaded', () => {
   experience.init(loader.resources);
   window.experience = experience;
+  loading.finish()
 })
 
 // register Debugger
