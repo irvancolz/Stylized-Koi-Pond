@@ -1,10 +1,11 @@
+import { data } from "../Utils/mock";
 import Entities from "./ExperienceObject";
 import * as THREE from 'three'
 
 export default class PineTree extends Entities {
   constructor(seed = []) {
     super();
-    this._seed = seed
+    this._seed = data.seeder(50, 1234)
   }
 
   init() {
@@ -16,8 +17,8 @@ export default class PineTree extends Entities {
       const obj = this._model.scene.clone()
       obj.matrix = mat.matrix.clone()
 
-      obj.quaternion.copy(new THREE.Quaternion(...ref.rotation))
-      obj.scale.copy(new THREE.Vector3(...ref.scale))
+      // obj.quaternion.copy(new THREE.Quaternion(...ref.rotation))
+      // obj.scale.copy(new THREE.Vector3(...ref.scale))
       obj.position.copy(new THREE.Vector3(...ref.translation))
       this.Graphics.Scene.add(obj)
     }

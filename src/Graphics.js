@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/Addons.js'
+import { OrbitControls, Sky } from 'three/examples/jsm/Addons.js'
 
 export default class Graphic {
   constructor(canvas, debug) {
@@ -36,6 +36,10 @@ export default class Graphic {
 
     this.Controls = new OrbitControls(this.Camera, this.$canvas)
     this.Controls.enableDamping = true
+    this.Controls.minPolarAngle = Math.PI * 0.25;
+    this.Controls.maxPolarAngle = Math.PI * 0.45;
+    this.Controls.maxDistance = 80 * 0.4;
+    this.Controls.minDistance = 1;
   }
 
   _InitRenderer() {
@@ -43,7 +47,7 @@ export default class Graphic {
     this.Renderer.toneMapping = THREE.CineonToneMapping;
     this.Renderer.toneMappingExposure = 1.75;
     this.Renderer.shadowMap.enabled = true;
-    this.Renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.Renderer.shadowMap.type = THREE.PCFShadowMap;
     this.Renderer.setClearColor("#211d20");
     this.Renderer.setSize(this.sizes.width, this.sizes.height);
     this.Renderer.setPixelRatio(Math.min(2, window.devicePixelRatio))
@@ -62,6 +66,7 @@ export default class Graphic {
     this.Sun.shadow.camera.near = 1;
     this.Sun.shadow.mapSize.set(2048, 2048);
     this.Sun.shadow.bias = -0.01;
+    this.Sun.shadow.radius = 2;
     this.Sun.castShadow = true;
     this.Scene.add(this.Sun)
 
@@ -157,6 +162,46 @@ export default class Graphic {
 
   }
 
+  _InitSky() {
+    this._sky = {
+      turbidity: 10,
+      rayleigh: 3,
+      mieCoefficient: 0.005,
+      mieDirectionalG: 0.7,
+      elevation: 7,
+      azimuth: -32.4,
+      exposure: this.Renderer.toneMappingExposure,
+      cloudCoverage: 0.4,
+      cloudDensity: 0.4,
+      cloudElevation: 0.5,
+    }
+
+    this.Sky = new Sky();
+    this.Sky.scale.setScalar(450000);
+    this.Scene.add(this.Sky);
+
+    const sun = new THREE.Vector3()
+
+    const uniforms = this.Sky.material.uniforms;
+
+    uniforms['turbidity'].value = this._sky.turbidity;
+    uniforms['rayleigh'].value = this._sky.rayleigh;
+    uniforms['mieCoefficient'].value = this._sky.mieCoefficient;
+    uniforms['mieDirectionalG'].value = this._sky.mieDirectionalG;
+    uniforms['cloudCoverage'].value = this._sky.cloudCoverage;
+    uniforms['cloudDensity'].value = this._sky.cloudDensity;
+    uniforms['cloudElevation'].value = this._sky.cloudElevation;
+
+    const phi = THREE.MathUtils.degToRad(90 - this._sky.elevation);
+    const theta = THREE.MathUtils.degToRad(this._sky.azimuth);
+
+    sun.setFromSphericalCoords(1, phi, theta);
+
+    uniforms['sunPosition'].value.copy(sun);
+
+    this.Renderer.toneMappingExposure = this._sky.exposure;
+  }
+
   init() {
     this._InitScene()
     this._InitCamera()
@@ -185,6 +230,7 @@ export default class Graphic {
 
   update() {
     this.Renderer.render(this.Scene, this.Camera)
+    this.Controls.update()
   }
 
   resize() {

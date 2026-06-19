@@ -13,9 +13,11 @@ import LotusLeaves from "./World/LotusLeaves";
 import LotusFlower from "./World/LotusFlower";
 import Fountain from "./World/Fountain";
 import Loading from "./Loading";
+import { BirchTree } from "./World/BirchTree";
+import Sky from "./World/Sky";
+import Waterfall from "./World/Waterfall";
 
 const loading = new Loading()
-loading.start()
 
 const canvas = document.getElementById("canvas");
 const debug = new Debugger()
@@ -34,6 +36,9 @@ for (let i = 0; i < FISH_COUNT; i++) {
 }
 experience.addFish(schools)
 
+const sky = new Sky()
+experience.addEntity(sky)
+
 const fountain = new Fountain()
 experience.addEntity(fountain)
 
@@ -46,12 +51,18 @@ experience.addEntity(lotusleaves)
 const lotusflower = new LotusFlower()
 experience.addEntity(lotusflower)
 
+const waterfall = new Waterfall()
+experience.addEntity(waterfall)
+
 const water = new Water()
 experience.addEntity(water)
 
 const pineReffs = seed.filter(el => el.name.toLowerCase().includes('pinetree'))
 const pineTree = new PineTree(pineReffs)
 experience.addEntity(pineTree);
+
+const birchTree = new BirchTree()
+experience.addEntity(birchTree);
 
 const starter = new Starter();
 // experience.addEntity(starter);
@@ -61,13 +72,10 @@ loader.on('finish:loaded', () => {
   experience.init(loader.resources);
   window.experience = experience;
   loading.finish()
+  // register Debugger
+  if (debug.active) {
+    experience.registerDebugger()
+
+  }
 })
 
-// register Debugger
-if (debug.active) {
-  experience.registerDebugger()
-
-  const fishDebugger = debug.ui.addFolder({ title: 'fish' })
-  fishDebugger.addBinding(FISH_CONFIG, 'maxSpeed', { min: .01, max: .2, step: .01 })
-  fishDebugger.addBinding(FISH_CONFIG, 'maxSteering', { min: .001, max: .01, step: .010 })
-}

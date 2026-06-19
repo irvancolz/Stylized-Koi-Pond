@@ -30,6 +30,16 @@ const models = [
     name: 'pinetree_model',
     type: 'gltfModel',
     path: './model/PineTree.glb'
+  },
+  {
+    name: 'birchtree_model',
+    type: 'gltfModel',
+    path: './model/BirchTree.glb'
+  },
+  {
+    name: 'waterfall_model',
+    type: 'gltfModel',
+    path: './model/Waterfall.glb'
   }
 
 ]
