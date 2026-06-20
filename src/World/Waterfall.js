@@ -178,7 +178,7 @@ export default class Waterfall extends Entities {
 
   registerDebugger() {
     const d = this.Debug.ui.addFolder({ title: 'waterfall / river' })
-    d.addBinding(this._uniforms.uSpeed, 'value', { min: .1, max: 3, step: .1, label: 'speed' })
+    d.addBinding(this._uniforms.uSpeed, 'value', { min: .1, max: 8, step: .1, label: 'speed' })
   }
 
   update() {

@@ -12,6 +12,21 @@ const models = [
     path: './model/Statue.glb'
   },
   {
+    name: 'stoneround_model',
+    type: 'gltfModel',
+    path: './model/StoneRound.glb'
+  },
+  {
+    name: 'stonetall_model',
+    type: 'gltfModel',
+    path: './model/StoneTall.glb'
+  },
+  {
+    name: 'tallgrass_model',
+    type: 'gltfModel',
+    path: './model/TallGrass.glb'
+  },
+  {
     name: 'lotusleaves_model',
     type: 'gltfModel',
     path: './model/LotusLeaves.glb'

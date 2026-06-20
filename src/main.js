@@ -16,6 +16,8 @@ import Loading from "./Loading";
 import { BirchTree } from "./World/BirchTree";
 import Sky from "./World/Sky";
 import Waterfall from "./World/Waterfall";
+import TallGrass from "./World/TallGrass";
+import Stones from "./World/Stones";
 
 const loading = new Loading()
 
@@ -45,7 +47,16 @@ experience.addEntity(fountain)
 const ground = new Ground()
 experience.addEntity(ground)
 
-const lotusleaves = new LotusLeaves()
+const stonesReffs = seed.filter(el => el.name.toLowerCase().includes('stone'))
+const stones = new Stones(stonesReffs)
+experience.addEntity(stones)
+
+const tallgrassReffs = seed.filter(el => el.name.toLowerCase().includes('tallgrass'))
+const tallgrass = new TallGrass(tallgrassReffs)
+experience.addEntity(tallgrass)
+
+const lotusLeavesReffs = seed.filter(el => el.name.toLowerCase().includes('lotusleaves'))
+const lotusleaves = new LotusLeaves(lotusLeavesReffs)
 experience.addEntity(lotusleaves)
 
 const lotusflower = new LotusFlower()

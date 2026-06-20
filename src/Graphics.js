@@ -1,15 +1,19 @@
 import * as THREE from 'three'
-import { OrbitControls, Sky } from 'three/examples/jsm/Addons.js'
+import { EffectComposer, LuminosityShader, OrbitControls, RenderPass, ShaderPass, Sky, SobelOperatorShader } from 'three/examples/jsm/Addons.js'
 
 export default class Graphic {
   constructor(canvas, debug) {
+
+    this._effects = {
+      postprocess: false
+    }
 
     this._sun = {
       intensity: 1.4
     }
 
     this._water = {
-      uWaterHeight: new THREE.Uniform(.66),
+      uWaterHeight: new THREE.Uniform(1.24),
       uWaterColor: new THREE.Uniform(new THREE.Color('#17cf9f')),
       uFoamWidth: new THREE.Uniform(.03)
     }
@@ -53,6 +57,22 @@ export default class Graphic {
     this.Renderer.setPixelRatio(Math.min(2, window.devicePixelRatio))
 
     this.Renderer.render(this.Scene, this.Camera)
+  }
+
+  _InitPostProcess() {
+    this.Composer = new EffectComposer(this.Renderer)
+
+    const renderPass = new RenderPass(this.Scene, this.Camera)
+    this.Composer.addPass(renderPass)
+
+    const effectGrayScale = new ShaderPass(LuminosityShader);
+    this.Composer.addPass(effectGrayScale);
+
+    const sobel = new ShaderPass(SobelOperatorShader)
+    sobel.uniforms['resolution'].value.x = window.innerWidth * window.devicePixelRatio;
+    sobel.uniforms['resolution'].value.y = window.innerHeight * window.devicePixelRatio;
+
+    this.Composer.addPass(sobel)
   }
 
   _InitLightning() {
@@ -207,6 +227,7 @@ export default class Graphic {
     this._InitCamera()
     this._InitLightning()
     this._InitRenderer()
+    this._InitPostProcess()
   }
 
   registerDebugger() {
@@ -226,10 +247,16 @@ export default class Graphic {
       this._water.uWaterColor.value.set(w.color)
     })
 
+    const effects = this.debug.ui.addFolder({ title: 'effects' })
+    effects.addBinding(this._effects, 'postprocess')
   }
 
   update() {
-    this.Renderer.render(this.Scene, this.Camera)
+    if (this._effects.postprocess) {
+      this.Composer.render()
+    } else {
+      this.Renderer.render(this.Scene, this.Camera)
+    }
     this.Controls.update()
   }
 
