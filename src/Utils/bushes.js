@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 export const bushes = (function() {
   return {
-    createGeometry: (sections = []) => {
+    createGeometry: (sections = [], density = 40) => {
       const geometry = new THREE.BufferGeometry()
 
       const positions = []
@@ -15,7 +15,7 @@ export const bushes = (function() {
       let leaves_id = 0
       const createLeaves = (origin, orientation, scale, idx) => {
         // i wish everyone whoo made bushes too big have strong device :p
-        const LEAVES_COUNT = 50 * Math.pow(scale.length(), 2);
+        const LEAVES_COUNT = density * Math.pow(scale.length(), 2);
 
         for (let i = 0; i < LEAVES_COUNT; i++) {
           // Random point on sphere surface

@@ -61,6 +61,15 @@ const models = [
 
 const textures = [
   {
+    name: 'grass_height',
+    type: 'texture',
+    path: './texture/GrassHeight.jpg',
+    onLoaded: (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace
+      tex.flipY = false
+    }
+  },
+  {
     name: 'leaves',
     type: 'texture',
     path: './texture/leaves.png',

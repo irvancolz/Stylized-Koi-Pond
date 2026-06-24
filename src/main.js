@@ -19,6 +19,7 @@ import Waterfall from "./World/Waterfall";
 import TallGrass from "./World/TallGrass";
 import Stones from "./World/Stones";
 import Bushes from "./World/Bushes";
+import Grass from "./World/Grass";
 
 const loading = new Loading()
 
@@ -42,7 +43,11 @@ experience.addFish(schools)
 const sky = new Sky()
 experience.addEntity(sky)
 
-// const bushes = new Bushes()
+const grass = new Grass()
+experience.addEntity(grass)
+
+const bushesReffs = seed.filter(el => el.name.toLowerCase().includes('bushes'))
+const bushes = new Bushes(bushesReffs)
 // experience.addEntity(bushes)
 
 const fountain = new Fountain()
@@ -75,7 +80,7 @@ experience.addEntity(water)
 
 const pineReffs = seed.filter(el => el.name.toLowerCase().includes('pinetree'))
 const pineTree = new PineTree(pineReffs)
-experience.addEntity(pineTree);
+// experience.addEntity(pineTree);
 
 const birchTreeReffs = seed.filter(el => el.name.toLowerCase().includes('birchtree'))
 const birchTree = new BirchTree(birchTreeReffs)
