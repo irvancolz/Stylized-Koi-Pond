@@ -33,17 +33,17 @@ export default class Graphic {
   }
 
   _InitCamera() {
-    this.Camera = new THREE.PerspectiveCamera(35, this.sizes.width / this.sizes.height, 1, 100)
+    this.Camera = new THREE.PerspectiveCamera(35, this.sizes.width / this.sizes.height, 1, 150)
     this.Camera.position.y = 30
     // this.Camera.position.x = 10
     this.Scene.add(this.Camera)
 
     this.Controls = new OrbitControls(this.Camera, this.$canvas)
     this.Controls.enableDamping = true
-    // this.Controls.minPolarAngle = Math.PI * 0.25;
-    // this.Controls.maxPolarAngle = Math.PI * 0.45;
-    // this.Controls.maxDistance = 80 * 0.4;
-    // this.Controls.minDistance = 1;
+    this.Controls.minPolarAngle = Math.PI * 0.25;
+    this.Controls.maxPolarAngle = Math.PI * 0.45;
+    this.Controls.maxDistance = 100 * 0.6;
+    this.Controls.minDistance = 1;
   }
 
   _InitRenderer() {
@@ -77,12 +77,12 @@ export default class Graphic {
 
   _InitLightning() {
     this.Sun = new THREE.DirectionalLight(0xffffff, this._sun.intensity)
-    this.Sun.position.set(.5, 1, 0.3).multiplyScalar(10)
+    this.Sun.position.set(.5, 1, 0.3).multiplyScalar(18)
     this.Sun.shadow.camera.top = 20;
     this.Sun.shadow.camera.bottom = -20;
     this.Sun.shadow.camera.right = 20;
     this.Sun.shadow.camera.left = -20;
-    this.Sun.shadow.camera.far = 20;
+    this.Sun.shadow.camera.far = 30;
     this.Sun.shadow.camera.near = 1;
     this.Sun.shadow.mapSize.set(2048, 2048);
     this.Sun.shadow.bias = -0.01;
@@ -184,46 +184,6 @@ export default class Graphic {
 
     this.Scene.traverse(swapToMeshToonMaterial)
 
-  }
-
-  _InitSky() {
-    this._sky = {
-      turbidity: 10,
-      rayleigh: 3,
-      mieCoefficient: 0.005,
-      mieDirectionalG: 0.7,
-      elevation: 7,
-      azimuth: -32.4,
-      exposure: this.Renderer.toneMappingExposure,
-      cloudCoverage: 0.4,
-      cloudDensity: 0.4,
-      cloudElevation: 0.5,
-    }
-
-    this.Sky = new Sky();
-    this.Sky.scale.setScalar(450000);
-    this.Scene.add(this.Sky);
-
-    const sun = new THREE.Vector3()
-
-    const uniforms = this.Sky.material.uniforms;
-
-    uniforms['turbidity'].value = this._sky.turbidity;
-    uniforms['rayleigh'].value = this._sky.rayleigh;
-    uniforms['mieCoefficient'].value = this._sky.mieCoefficient;
-    uniforms['mieDirectionalG'].value = this._sky.mieDirectionalG;
-    uniforms['cloudCoverage'].value = this._sky.cloudCoverage;
-    uniforms['cloudDensity'].value = this._sky.cloudDensity;
-    uniforms['cloudElevation'].value = this._sky.cloudElevation;
-
-    const phi = THREE.MathUtils.degToRad(90 - this._sky.elevation);
-    const theta = THREE.MathUtils.degToRad(this._sky.azimuth);
-
-    sun.setFromSphericalCoords(1, phi, theta);
-
-    uniforms['sunPosition'].value.copy(sun);
-
-    this.Renderer.toneMappingExposure = this._sky.exposure;
   }
 
   init() {
