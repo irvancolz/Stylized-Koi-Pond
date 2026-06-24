@@ -1,14 +1,45 @@
-import { data } from "../Utils/mock";
+import { bushes } from "../Utils/bushes";
 import Entities from "./ExperienceObject";
 import * as THREE from 'three'
 
 export class BirchTree extends Entities {
-  constructor() {
+  constructor(reffs) {
     super()
+    this._reffs = reffs
+    this._foliages = {}
+    this._stem = {}
+  }
 
-    const COUNT = 40
-    this._reffs = data.seeder(COUNT, 12)
-    this._instances = []
+  _CreateFoliages(sections) {
+
+    this._foliages.material = new THREE.MeshToonMaterial({
+      alphaTest: .5,
+      depthWrite: false,
+      transparent: true,
+      side: THREE.DoubleSide,
+      // wireframe: true,
+    })
+    this._foliages.material.alphaMap = this.Resources['leaves']
+    this._foliages.geometry = bushes.createGeometry(sections)
+    this._foliages.mesh = new THREE.InstancedMesh(this._foliages.geometry, this._foliages.material, this._reffs.length)
+    this._foliages.mesh.castShadow = true
+    this._foliages.mesh.receiveShadow = true
+
+    this._foliages.mesh.customDepthMaterial = new THREE.MeshDepthMaterial({
+      alphaTest: .5,
+      transparent: true,
+      depthPacking: THREE.RGBADepthPacking,
+    })
+    this._foliages.mesh.customDepthMaterial.alphaMap = this.Resources['leaves']
+    // this._mesh.position.copy(this._position)
+
+    this.Graphics.Scene.add(this._foliages.mesh)
+
+  }
+
+  _CreateStem() {
+    this._stem.mesh = new THREE.InstancedMesh(this._stem.geometry, this._stem.material, this._reffs.length);
+    this.Graphics.Scene.add(this._stem.mesh)
   }
 
   init() {
@@ -18,40 +49,31 @@ export class BirchTree extends Entities {
 
     this._mesh.traverse(el => {
       if (el.name.toLowerCase().includes('foliage')) foliages.push(el)
+      if (el.isMesh) {
+        this._stem.geometry = el.geometry
+        this._stem.material = el.material
+      }
     })
 
+    this._CreateFoliages(foliages)
+    this._CreateStem()
+
+    const dummy = new THREE.Object3D()
     for (let i = 0; i < this._reffs.length; i++) {
-      const mesh = this._mesh.clone()
+      dummy.position.copy(new THREE.Vector3(...this._reffs[i].translation))
+      dummy.quaternion.copy(new THREE.Quaternion(...this._reffs[i].rotation))
+      dummy.scale.copy(new THREE.Vector3(...this._reffs[i].scale))
 
-      const bushes = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshStandardMaterial({ color: '#18db77' }))
-      foliages.forEach(el => {
-        const b = bushes.clone()
-        b.position.copy(el.position);
-        b.rotation.copy(el.rotation);
-        // b.scale.copy(el.scale);
+      dummy.updateMatrix()
 
-        mesh.add(b)
-
-      })
-
-      const reff = this._reffs[i]
-      mesh.position.copy(new THREE.Vector3(...reff.translation))
-      mesh.scale.copy(new THREE.Vector3(...reff.scale))
-      // mesh.quaternion.copy(new THREE.Quaternion(...reff.rotation))
-
-
-      this._instances.push(mesh)
-
-      this.Graphics.Scene.add(mesh)
+      this._stem.mesh.setMatrixAt(i, dummy.matrix)
+      this._foliages.mesh.setMatrixAt(i, dummy.matrix)
     }
 
   }
 
   dispose() {
-    for (let i = 0; i < this._instances.length; i++) {
-      const mesh = this._instances[i]
-
-      this.Graphics.Scene.remove(mesh)
-    }
+    this.Graphics.Scene.remove(this._stem.mesh)
+    this.Graphics.Scene.remove(this._foliages.mesh)
   }
 }

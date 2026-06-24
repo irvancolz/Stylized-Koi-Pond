@@ -40,10 +40,10 @@ export default class Graphic {
 
     this.Controls = new OrbitControls(this.Camera, this.$canvas)
     this.Controls.enableDamping = true
-    this.Controls.minPolarAngle = Math.PI * 0.25;
-    this.Controls.maxPolarAngle = Math.PI * 0.45;
-    this.Controls.maxDistance = 80 * 0.4;
-    this.Controls.minDistance = 1;
+    // this.Controls.minPolarAngle = Math.PI * 0.25;
+    // this.Controls.maxPolarAngle = Math.PI * 0.45;
+    // this.Controls.maxDistance = 80 * 0.4;
+    // this.Controls.minDistance = 1;
   }
 
   _InitRenderer() {
@@ -150,9 +150,13 @@ export default class Graphic {
       if (!el.isMesh) return
       if (!el.material.isMeshStandardMaterial) return
       el.material = new THREE.MeshToonMaterial({
+        alphaMap: el.material.alphaMap,
+        alphaTest: el.material.alphaTest,
+        transparent: el.material.transparent,
+        depthWrite: el.material.depthWrite,
         map: el.material.map,
         color: el.material.color,
-        side: THREE.DoubleSide
+        side: el.material.side
       })
 
       el.material.defines = {

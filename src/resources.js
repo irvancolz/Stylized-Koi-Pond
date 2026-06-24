@@ -61,6 +61,11 @@ const models = [
 
 const textures = [
   {
+    name: 'leaves',
+    type: 'texture',
+    path: './texture/leaves.png',
+  },
+  {
     name: 'koi_pattern_01',
     type: 'texture',
     path: './texture/KoiPattern01.jpg',
