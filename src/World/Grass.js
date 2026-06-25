@@ -292,14 +292,14 @@ export default class Grass extends Entities {
       if (!e.last) return;
       this.reset();
     });
-    f.addBinding(this, "width", {
-      min: 1,
-      max: 128,
-      step: 10,
-    }).on("change", (e) => {
-      if (!e.last) return;
-      this.reset();
-    });
+    // f.addBinding(this, "width", {
+    //   min: 1,
+    //   max: 128,
+    //   step: 10,
+    // }).on("change", (e) => {
+    //   if (!e.last) return;
+    //   this.reset();
+    // });
   }
 
   reset() {
