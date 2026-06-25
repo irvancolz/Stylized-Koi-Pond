@@ -2,132 +2,139 @@ import * as THREE from "three";
 import { math, } from "../Utils/math";
 import Entities from "./ExperienceObject";
 
-const vertexShader = `
-attribute vec2 aCenter;
-attribute vec3 color;
+const vertexShaderPar = `
+  #include <common>
 
-uniform float uTime;
-uniform float uElevation;
-uniform sampler2D uGrassHeightTex;
+  attribute vec2 aCenter;
+  attribute vec3 color;
 
-varying vec3 vColor;
-varying vec2 vWorldUv;
+  uniform float uTime;
+  uniform float uElevation;
+  uniform sampler2D uGrassHeightTex;
 
-
-//	Classic Perlin 2D Noise 
-//	by Stefan Gustavson (https://github.com/stegu/webgl-noise)
-//
-vec2 fade(vec2 t) {return t*t*t*(t*(t*6.0-15.0)+10.0);}
-vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
-
-float cnoise(vec2 P){
-  vec4 Pi = floor(P.xyxy) + vec4(0.0, 0.0, 1.0, 1.0);
-  vec4 Pf = fract(P.xyxy) - vec4(0.0, 0.0, 1.0, 1.0);
-  Pi = mod(Pi, 289.0); // To avoid truncation effects in permutation
-  vec4 ix = Pi.xzxz;
-  vec4 iy = Pi.yyww;
-  vec4 fx = Pf.xzxz;
-  vec4 fy = Pf.yyww;
-  vec4 i = permute(permute(ix) + iy);
-  vec4 gx = 2.0 * fract(i * 0.0243902439) - 1.0; // 1/41 = 0.024...
-  vec4 gy = abs(gx) - 0.5;
-  vec4 tx = floor(gx + 0.5);
-  gx = gx - tx;
-  vec2 g00 = vec2(gx.x,gy.x);
-  vec2 g10 = vec2(gx.y,gy.y);
-  vec2 g01 = vec2(gx.z,gy.z);
-  vec2 g11 = vec2(gx.w,gy.w);
-  vec4 norm = 1.79284291400159 - 0.85373472095314 * 
-    vec4(dot(g00, g00), dot(g01, g01), dot(g10, g10), dot(g11, g11));
-  g00 *= norm.x;
-  g01 *= norm.y;
-  g10 *= norm.z;
-  g11 *= norm.w;
-  float n00 = dot(g00, vec2(fx.x, fy.x));
-  float n10 = dot(g10, vec2(fx.y, fy.y));
-  float n01 = dot(g01, vec2(fx.z, fy.z));
-  float n11 = dot(g11, vec2(fx.w, fy.w));
-  vec2 fade_xy = fade(Pf.xy);
-  vec2 n_x = mix(vec2(n00, n01), vec2(n10, n11), fade_xy.x);
-  float n_xy = mix(n_x.x, n_x.y, fade_xy.y);
-  return 2.3 * n_xy;
-}
-
-#define WORLD_DIAMETER 40.
-
-vec2 getWorldUV(vec2 worldPos) {
-    vec2 pos = worldPos + vec2(.5 * WORLD_DIAMETER);
-
-    return fract(pos / vec2(WORLD_DIAMETER));
-}
-
-vec2 getRotatePivot2d(vec2 uv, float rotation, vec2 pivot) {
-  return vec2(cos(rotation) * (uv.x - pivot.x) + sin(rotation) * (uv.y - pivot.y) + pivot.x, cos(rotation) * (uv.y - pivot.y) - sin(rotation) * (uv.x - pivot.x) + pivot.y);
-}
-
-void main() {
-
-  vec3 transformed = position;
-
-  vec2 newCenter = aCenter;
-  vec4 worldPos = modelMatrix * vec4(position, 1.);
-  worldPos.xz += newCenter;
-
-  vec2 worldUv = getWorldUV(worldPos.xz);
-  
-  float h = texture2D(uGrassHeightTex, worldUv).r;
-  transformed.xyz *= h;
-  
-  vec4 modelCenter = modelMatrix * vec4(newCenter.x, 0.0, newCenter.y, 1.0);
-
-  transformed.y += uElevation;
-  vec4 modelPosition = modelMatrix * vec4(transformed, 1.);
-  modelPosition.xz += newCenter;
-
-  float noise = cnoise(worldUv * 4.);
-
-  float displacement = sin(uTime * .002 + noise * 10.) * color.r;
-  displacement *= .12;
-  modelPosition.x += displacement;
-  modelPosition.z += displacement;
-
-  float angleToCamera = atan(modelCenter.x - cameraPosition.x, modelCenter.z - cameraPosition.z);
-  modelPosition.xz = getRotatePivot2d(modelPosition.xz, angleToCamera, modelCenter.xz);
-
-  vec4 modelViewPosition = viewMatrix * modelPosition;
-  vec4 projectedPosition = projectionMatrix * modelViewPosition;
-  gl_Position = projectedPosition;
+  varying vec3 vColor;
+  varying vec2 vWorldUv;
 
 
-  vColor = color;
-  vWorldUv = worldUv;
-  // csm_PositionRaw = projectedPosition;
+  //	Classic Perlin 2D Noise 
+  //	by Stefan Gustavson (https://github.com/stegu/webgl-noise)
+  //
+  vec2 fade(vec2 t) {return t*t*t*(t*(t*6.0-15.0)+10.0);}
+  vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
 
-}
+  float cnoise(vec2 P){
+    vec4 Pi = floor(P.xyxy) + vec4(0.0, 0.0, 1.0, 1.0);
+    vec4 Pf = fract(P.xyxy) - vec4(0.0, 0.0, 1.0, 1.0);
+    Pi = mod(Pi, 289.0); // To avoid truncation effects in permutation
+    vec4 ix = Pi.xzxz;
+    vec4 iy = Pi.yyww;
+    vec4 fx = Pf.xzxz;
+    vec4 fy = Pf.yyww;
+    vec4 i = permute(permute(ix) + iy);
+    vec4 gx = 2.0 * fract(i * 0.0243902439) - 1.0; // 1/41 = 0.024...
+    vec4 gy = abs(gx) - 0.5;
+    vec4 tx = floor(gx + 0.5);
+    gx = gx - tx;
+    vec2 g00 = vec2(gx.x,gy.x);
+    vec2 g10 = vec2(gx.y,gy.y);
+    vec2 g01 = vec2(gx.z,gy.z);
+    vec2 g11 = vec2(gx.w,gy.w);
+    vec4 norm = 1.79284291400159 - 0.85373472095314 * 
+      vec4(dot(g00, g00), dot(g01, g01), dot(g10, g10), dot(g11, g11));
+    g00 *= norm.x;
+    g01 *= norm.y;
+    g10 *= norm.z;
+    g11 *= norm.w;
+    float n00 = dot(g00, vec2(fx.x, fy.x));
+    float n10 = dot(g10, vec2(fx.y, fy.y));
+    float n01 = dot(g01, vec2(fx.z, fy.z));
+    float n11 = dot(g11, vec2(fx.w, fy.w));
+    vec2 fade_xy = fade(Pf.xy);
+    vec2 n_x = mix(vec2(n00, n01), vec2(n10, n11), fade_xy.x);
+    float n_xy = mix(n_x.x, n_x.y, fade_xy.y);
+    return 2.3 * n_xy;
+  }
+
+  #define WORLD_DIAMETER 40.
+
+  vec2 getWorldUV(vec2 worldPos) {
+      vec2 pos = worldPos + vec2(.5 * WORLD_DIAMETER);
+
+      return fract(pos / vec2(WORLD_DIAMETER));
+  }
+
+  vec2 getRotatePivot2d(vec2 uv, float rotation, vec2 pivot) {
+    return vec2(cos(rotation) * (uv.x - pivot.x) + sin(rotation) * (uv.y - pivot.y) + pivot.x, cos(rotation) * (uv.y - pivot.y) - sin(rotation) * (uv.x - pivot.x) + pivot.y);
+  }
+
 
 `
 
-const fragmentShader = `
-uniform vec3 uColor;
-uniform vec3 uGroundColor;
-uniform sampler2D uGrassHeightTex;
+const vertexShaderMain = `
+    #include <project_vertex>
+    // vec4 mvPosition = vec4( transformed, 1.0 );
+    transformed = position;
 
-varying vec3 vColor;
-varying vec2 vWorldUv;
+    vec2 newCenter = aCenter;
+    vec4 worldPos = modelMatrix * vec4(position, 1.);
+    worldPos.xz += newCenter;
 
-void main() {
+    vec2 worldUv = getWorldUV(worldPos.xz);
     
-    float h = texture2D(uGrassHeightTex, vWorldUv).r;
-    if(h <= 0.2) discard;
+    float h = texture2D(uGrassHeightTex, worldUv).r;
+    transformed.xyz *= h;
+    
+    vec4 modelCenter = modelMatrix * vec4(newCenter.x, 0.0, newCenter.y, 1.0);
+
+    transformed.y += uElevation;
+    vec4 modelPosition = modelMatrix * vec4(transformed, 1.);
+    modelPosition.xz += newCenter;
+
+    float noise = cnoise(worldUv * 4.);
+
+    float displacement = sin(uTime * .002 + noise * 10.) * color.r;
+    displacement *= .12;
+    modelPosition.x += displacement;
+    modelPosition.z += displacement;
+
+    float angleToCamera = atan(modelCenter.x - cameraPosition.x, modelCenter.z - cameraPosition.z);
+    modelPosition.xz = getRotatePivot2d(modelPosition.xz, angleToCamera, modelCenter.xz);
+
+    vec4 modelViewPosition = viewMatrix * modelPosition;
+    vec4 projectedPosition = projectionMatrix * modelViewPosition;
+    mvPosition = modelViewPosition;
+    gl_Position = projectedPosition;
+
+
+    vColor = color;
+    vWorldUv = worldUv;
+
+  `
+
+const fragmentShaderPar = `
+  #include <common>
+
+  uniform vec3 uColor;
+  uniform vec3 uGroundColor;
+  uniform sampler2D uGrassHeightTex;
+
+  varying vec3 vColor;
+  varying vec2 vWorldUv;
+
+`
+
+const fragmentShaderMain = `
+    vec4 diffuseColor = vec4( diffuse, opacity );
+
+    float grassh = texture2D(uGrassHeightTex, vWorldUv).r;
+    if(grassh <= 0.2) discard;
 
     float ci = 1. - vColor.r;
-    ci = 1. - pow(ci, 3.);
+    ci = 1. - pow(ci, 6.);
 
     vec3 color = mix(uGroundColor, uColor, ci);
 
-    gl_FragColor = vec4(color, 1.);
-    // csm_DiffuseColor = vec4(color, 1.);
-}
+    diffuseColor.rgb = color;
 
 `
 
@@ -136,7 +143,8 @@ export default class Grass extends Entities {
     super()
 
     this.density = 100;
-    this.width = 40;
+    // made it slightly smaller than the world
+    this.width = 39;
     this.count = this.density * this.width ** 2;
     this.position = new THREE.Vector3();
 
@@ -147,14 +155,15 @@ export default class Grass extends Entities {
     this.BLADE_HEIGHT_VARIATION = 0.2;
 
     this.positionsArray = [];
+    this.normalsArray = [];
     this.uvsArray = [];
     this.colorsArray = [];
     this.indiciesArray = [];
     this.centersArray = [];
 
     this.debugConfig = {
-      color: "#61b19c",
-      ground: "#eadbcb",
+      color: "#4a917e",
+      ground: "#daba99",
     };
 
   }
@@ -165,15 +174,21 @@ export default class Grass extends Entities {
       uColor: new THREE.Uniform(new THREE.Color(this.debugConfig.color)),
       uGroundColor: new THREE.Uniform(new THREE.Color(this.debugConfig.ground)),
       uTime: new THREE.Uniform(0),
-      uElevation: new THREE.Uniform(1.8),
+      uElevation: new THREE.Uniform(1.4),
       uGrassHeightTex: new THREE.Uniform()
     };
-    this.material = new THREE.ShaderMaterial({
-      vertexShader,
-      fragmentShader,
-      uniforms: this.uniforms,
-      side: THREE.DoubleSide
+    this.material = new THREE.MeshToonMaterial({
+      side: THREE.DoubleSide,
     });
+    this.material.onBeforeCompile = shader => {
+      shader.uniforms = { ...shader.uniforms, ...this.uniforms }
+
+      shader.vertexShader = shader.vertexShader.replace('#include <common>', vertexShaderPar)
+      shader.vertexShader = shader.vertexShader.replace('#include <project_vertex>', vertexShaderMain)
+
+      shader.fragmentShader = shader.fragmentShader.replace('#include <common>', fragmentShaderPar)
+      shader.fragmentShader = shader.fragmentShader.replace('vec4 diffuseColor = vec4( diffuse, opacity );', fragmentShaderMain)
+    }
   }
 
   initGeometry() {
@@ -202,6 +217,7 @@ export default class Grass extends Entities {
             this.positionsArray.push(...vert.pos);
             this.uvsArray.push(...vert.uv);
             this.colorsArray.push(...vert.color);
+            this.normalsArray.push(...vert.normal);
             this.centersArray.push(center.x, center.z);
           });
           blade.indices.forEach((i) => this.indiciesArray.push(i));
@@ -218,6 +234,10 @@ export default class Grass extends Entities {
     this.geometry.setAttribute(
       "uv",
       new THREE.Float32BufferAttribute(new Float32Array(this.uvsArray), 2)
+    );
+    this.geometry.setAttribute(
+      "cnormal",
+      new THREE.Float32BufferAttribute(new Float32Array(this.normalsArray), 3)
     );
     this.geometry.setAttribute(
       "color",
@@ -240,7 +260,7 @@ export default class Grass extends Entities {
     this.mesh = new THREE.Mesh(this.geometry, this.material);
     this.mesh.frustumCulled = false;
     this.mesh.receiveShadow = true;
-    // this.mesh.castShadow = true;
+    this.mesh.castShadow = true;
 
     this.Graphics.Scene.add(this.mesh);
   }
@@ -252,10 +272,10 @@ export default class Grass extends Entities {
     });
 
     f.addBinding(this.debugConfig, "color").on("change", () => {
-      this.material.uniforms.uColor.value.set(this.debugConfig.color);
+      this.uniforms.uColor.value.set(this.debugConfig.color);
     });
     f.addBinding(this.debugConfig, "ground").on("change", () => {
-      this.material.uniforms.uGroundColor.value.set(this.debugConfig.ground);
+      this.uniforms.uGroundColor.value.set(this.debugConfig.ground);
     });
 
     f.addBinding(this.uniforms.uElevation, "value", {
@@ -345,9 +365,9 @@ export default class Grass extends Entities {
     const white = [1.0, 1.0, 1.0];
 
     const verts = [
-      { pos: bl.toArray(), uv: uv, color: black },
-      { pos: br.toArray(), uv: uv, color: black },
-      { pos: tc.toArray(), uv: uv, color: white },
+      { pos: bl.toArray(), uv: uv, color: black, normal: bl.normalize().toArray() },
+      { pos: br.toArray(), uv: uv, color: black, normal: br.normalize().toArray() },
+      { pos: tc.toArray(), uv: uv, color: white, normal: tc.normalize().toArray() },
     ];
 
     const indices = [vArrOffset, vArrOffset + 1, vArrOffset + 2];

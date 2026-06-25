@@ -41,42 +41,42 @@ for (let i = 0; i < FISH_COUNT; i++) {
 experience.addFish(schools)
 
 const sky = new Sky()
-experience.addEntity(sky)
+// experience.addEntity(sky)
 
 const grass = new Grass()
-experience.addEntity(grass)
+// experience.addEntity(grass)
 
 const bushesReffs = seed.filter(el => el.name.toLowerCase().includes('bushes'))
 const bushes = new Bushes(bushesReffs)
 // experience.addEntity(bushes)
 
 const fountain = new Fountain()
-experience.addEntity(fountain)
+// experience.addEntity(fountain)
 
 const ground = new Ground()
-experience.addEntity(ground)
+// experience.addEntity(ground)
 
 const stonesReffs = seed.filter(el => el.name.toLowerCase().includes('stone'))
 const stones = new Stones(stonesReffs)
-experience.addEntity(stones)
+// experience.addEntity(stones)
 
 const tallgrassReffs = seed.filter(el => el.name.toLowerCase().includes('tallgrass'))
 const tallgrass = new TallGrass(tallgrassReffs)
-experience.addEntity(tallgrass)
+// experience.addEntity(tallgrass)
 
 const lotusLeavesReffs = seed.filter(el => el.name.toLowerCase().includes('lotusleaves'))
 const lotusleaves = new LotusLeaves(lotusLeavesReffs)
-experience.addEntity(lotusleaves)
+// experience.addEntity(lotusleaves)
 
 const lotusFlowerReffs = seed.filter(el => el.name.toLowerCase().includes('lotusflower'))
 const lotusflower = new LotusFlower(lotusFlowerReffs)
-experience.addEntity(lotusflower)
+// experience.addEntity(lotusflower)
 
 const waterfall = new Waterfall()
-experience.addEntity(waterfall)
+// experience.addEntity(waterfall)
 
 const water = new Water()
-experience.addEntity(water)
+// experience.addEntity(water)
 
 const pineReffs = seed.filter(el => el.name.toLowerCase().includes('pinetree'))
 const pineTree = new PineTree(pineReffs)
@@ -84,10 +84,23 @@ const pineTree = new PineTree(pineReffs)
 
 const birchTreeReffs = seed.filter(el => el.name.toLowerCase().includes('birchtree'))
 const birchTree = new BirchTree(birchTreeReffs)
-experience.addEntity(birchTree);
+// experience.addEntity(birchTree);
 
-const starter = new Starter();
-// experience.addEntity(starter);
+const objects = [
+  grass,
+  ground,
+  sky,
+  fountain,
+  birchTree,
+  stones,
+  lotusflower,
+  lotusleaves,
+  water,
+  waterfall,
+  tallgrass
+]
+
+experience.addEntity(objects)
 
 const loader = new ResourcesLoader(resources)
 loader.on('finish:loaded', () => {

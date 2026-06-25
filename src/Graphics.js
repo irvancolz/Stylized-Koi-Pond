@@ -148,24 +148,28 @@ export default class Graphic {
 
     const swapToMeshToonMaterial = (el) => {
       if (!el.isMesh) return
-      if (!el.material.isMeshStandardMaterial) return
-      el.material = new THREE.MeshToonMaterial({
-        alphaMap: el.material.alphaMap,
-        alphaTest: el.material.alphaTest,
-        transparent: el.material.transparent,
-        depthWrite: el.material.depthWrite,
-        map: el.material.map,
-        color: el.material.color,
-        side: el.material.side
+      const prevMat = el.material;
+      if (!prevMat.isMeshStandardMaterial) return
+
+      const newMat = new THREE.MeshToonMaterial({
+        alphaMap: prevMat.alphaMap,
+        alphaTest: prevMat.alphaTest,
+        transparent: prevMat.transparent,
+        depthWrite: prevMat.depthWrite,
+        map: prevMat.map,
+        color: prevMat.color,
+        side: prevMat.side
       })
 
-      el.material.defines = {
-        ...el.material.defines,
+      newMat.defines = {
+        ...prevMat.defines,
       }
 
-      if (el.isFish) el.material.defines.IS_FISH = ''
+      if (el.isFish) newMat.defines.IS_FISH = ''
+      newMat.onBeforeCompile = (shader) => {
+        // incase the material is already extended
+        prevMat.onBeforeCompile(shader)
 
-      el.material.onBeforeCompile = (shader) => {
         shader.uniforms = { ...shader.uniforms, ...this._water }
 
         shader.vertexShader = shader.vertexShader.replace('#include <common>', custVertParIncl)
@@ -176,7 +180,7 @@ export default class Graphic {
 
       }
 
-
+      el.material = newMat
       el.receiveShadow = true
       el.castShadow = true
 
