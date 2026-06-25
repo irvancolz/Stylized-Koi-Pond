@@ -108,9 +108,9 @@ loader.on('finish:loaded', () => {
   window.experience = experience;
   loading.finish()
   // register Debugger
-  if (debug.active) {
-    experience.registerDebugger()
+  // if (debug.active) {
+  experience.registerDebugger()
 
-  }
+  // }
 })
 
