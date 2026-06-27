@@ -323,7 +323,7 @@ export default class Grass extends Entities {
   }
 
   dispose() {
-    this.scene.remove(this.mesh);
+    this.Graphics.Scene.remove(this.mesh);
     this.material.dispose();
     this.geometry.dispose();
   }

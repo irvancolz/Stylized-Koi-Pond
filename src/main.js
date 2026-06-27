@@ -29,12 +29,12 @@ const experience = new Experience(canvas, debug);
 
 const FISH_CONFIG = {
   maxSpeed: .01,
-  maxSteering: .01
+  maxSteering: .01,
+  count: 30
 }
 
 const schools = []
-const FISH_COUNT = 40;
-for (let i = 0; i < FISH_COUNT; i++) {
+for (let i = 0; i < FISH_CONFIG.count; i++) {
   const fish = new Fish(FISH_CONFIG)
   schools.push(fish)
 }
@@ -110,6 +110,24 @@ loader.on('finish:loaded', () => {
   // register Debugger
   // if (debug.active) {
   experience.registerDebugger()
+
+  const fish = debug.ui.addFolder({ title: 'fish' })
+  fish.addBinding(FISH_CONFIG, 'count', { min: 10, max: 500, step: 1 }).on('change', () => {
+    experience.disposeFishes()
+
+    schools.length = 0
+
+    for (let i = 0; i < FISH_CONFIG.count; i++) {
+      const fish = new Fish(FISH_CONFIG)
+      fish.setGraphics(experience.Graphics)
+      fish.setDebug(experience.debug)
+      fish.setResources(experience.resources)
+      fish.setStates(experience.states)
+      fish.init()
+      schools.push(fish)
+    }
+    experience.addFish(schools)
+  })
 
   // }
 })

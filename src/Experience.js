@@ -126,4 +126,10 @@ export default class Experience {
     }
 
   }
+
+  disposeFishes() {
+    for (let i = 0; i < this.fishes.length; i++) {
+      this.fishes[i].dispose()
+    }
+  }
 }
