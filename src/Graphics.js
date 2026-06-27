@@ -1,11 +1,13 @@
 import * as THREE from 'three'
-import { EffectComposer, LuminosityShader, OrbitControls, RenderPass, ShaderPass, Sky, SobelOperatorShader } from 'three/examples/jsm/Addons.js'
+import { EffectComposer, OrbitControls, OutputPass, RenderPass, } from 'three/examples/jsm/Addons.js'
+import { OutlinePass as CustomOutlinePass } from './Pass/Outline'
 
 export default class Graphic {
   constructor(canvas, debug) {
 
     this._effects = {
-      postprocess: false
+      postprocess: true,
+      outlineColor: '#000000'
     }
 
     this._sun = {
@@ -65,14 +67,11 @@ export default class Graphic {
     const renderPass = new RenderPass(this.Scene, this.Camera)
     this.Composer.addPass(renderPass)
 
-    const effectGrayScale = new ShaderPass(LuminosityShader);
-    this.Composer.addPass(effectGrayScale);
+    this.OutlinePass = new CustomOutlinePass()
+    this.Composer.addPass(this.OutlinePass)
 
-    const sobel = new ShaderPass(SobelOperatorShader)
-    sobel.uniforms['resolution'].value.x = window.innerWidth * window.devicePixelRatio;
-    sobel.uniforms['resolution'].value.y = window.innerHeight * window.devicePixelRatio;
-
-    this.Composer.addPass(sobel)
+    const outputPass = new OutputPass()
+    this.Composer.addPass(outputPass)
   }
 
   _InitLightning() {
@@ -97,8 +96,8 @@ export default class Graphic {
     this.Scene.add(this.Ambient)
   }
 
-  initEffects() {
-    // here is where i hijack the material
+  modifyMaterial() {
+    // here is where i hijack the material 
     const custVertParIncl = `
     #include <common>
 
@@ -199,7 +198,6 @@ export default class Graphic {
   }
 
   registerDebugger() {
-    if (!this.debug.active) return
 
     const sun = this.debug.ui.addFolder({ title: 'lights' })
     sun.addBinding(this._sun, 'intensity', { min: .1, max: 10, step: .1, label: 'sun' }).on('change', () => this.Sun.intensity = this._sun.intensity)
@@ -217,6 +215,9 @@ export default class Graphic {
 
     const effects = this.debug.ui.addFolder({ title: 'effects' })
     effects.addBinding(this._effects, 'postprocess')
+    effects.addBinding(this._effects, 'outlineColor').on('change', () => {
+      this.OutlinePass.uniforms.uLineColor.value.set(this._effects.outlineColor)
+    })
   }
 
   update() {

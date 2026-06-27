@@ -1,4 +1,3 @@
-import * as THREE from 'three'
 import States from "./States";
 import Graphics from "./Graphics";
 
@@ -84,7 +83,7 @@ export default class Experience {
       fish.init()
     }
 
-    this.Graphics.initEffects()
+    this.Graphics.modifyMaterial()
   }
 
   addFish(entities) {

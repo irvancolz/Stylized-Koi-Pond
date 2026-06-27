@@ -4,10 +4,11 @@ import Entities from "./ExperienceObject";
 export default class Water extends Entities {
   constructor() {
     super()
-    const size = 30
+    const size = 40
 
     this._uniforms = {
-      uTime: new THREE.Uniform(0)
+      uTime: new THREE.Uniform(0),
+      uWidth: new THREE.Uniform(size),
     }
 
     // non MehsBasicmaterial won't be modified :p
@@ -39,6 +40,7 @@ export default class Water extends Entities {
       shader.fragmentShader = shader.fragmentShader.replace('#include <common>', `
       
     uniform float uTime;
+    uniform float uWidth;
 
     #include <common>
     float voronoi(vec2 uv) {
@@ -83,6 +85,11 @@ export default class Water extends Entities {
     float alpha = voronoi(distortedUV );
     alpha = smoothstep(.05, .02, alpha);
     diffuseColor.a = alpha;
+
+    float dist = distance(vUv, vec2(.5));
+    dist =  step(dist, .5);
+    
+    diffuseColor.a *= dist;
 
     #include <alphatest_fragment>
             `)

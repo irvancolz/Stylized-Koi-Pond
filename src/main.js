@@ -1,6 +1,5 @@
 import Experience from "./Experience";
 import "./style.css";
-import Starter from "./World/Starter";
 import Fish from "./World/Fish";
 import Debugger from "./Debugger";
 import ResourcesLoader from "./Utils/ResourcesLoader";
