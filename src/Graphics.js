@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { EffectComposer, OrbitControls, OutputPass, RenderPass, } from 'three/examples/jsm/Addons.js'
+import { DotScreenPass, EffectComposer, OrbitControls, OutputPass, RenderPass, } from 'three/examples/jsm/Addons.js'
 import { OutlinePass as CustomOutlinePass } from './Pass/Outline'
 
 export default class Graphic {
@@ -69,6 +69,9 @@ export default class Graphic {
 
     this.OutlinePass = new CustomOutlinePass()
     this.Composer.addPass(this.OutlinePass)
+
+    const dsPass = new DotScreenPass()
+    // this.Composer.addPass(dsPass)
 
     const outputPass = new OutputPass()
     this.Composer.addPass(outputPass)

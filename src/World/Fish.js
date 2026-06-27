@@ -18,12 +18,14 @@ class Fish extends Entities {
     const r = SPREAD
     this._position = new THREE.Vector3(math.rand_range(-r, r), math.rand_range(.0, .5), math.rand_range(-r, r))
     this._velocity = new THREE.Vector3(math.rand_range(-1, 1), 0, math.rand_range(-1, 1))
+    this._wanderAngle = 0
   }
 
   init() {
     id++
     this._id = id
     this._offset = id + Math.random()
+    this._wanderAngle += this._offset
 
     const gltf = this.Resources["fish_model"]
     this._mesh = SkeletonUtils.clone(gltf.scene)
@@ -121,8 +123,26 @@ class Fish extends Entities {
     return avgPosition
   }
 
+  _applyWander() {
+    this._wanderAngle += 1;
+    const angle = this._wanderAngle * .05;
+
+    const rot = new THREE.Vector3(0, Math.sin(angle) * .03, 0)
+    const dir = new THREE.Euler().setFromVector3(rot)
+    const force = this._velocity.clone()
+    force.applyEuler(dir)
+    force.normalize()
+
+    return force.multiplyScalar(.1)
+  }
+
   _applySteering(schools) {
-    const forces = [this._applyAlignment(schools), this._applySeparation(schools), this._applyCohesion(schools)]
+    const forces = [
+      this._applyAlignment(schools),
+      this._applySeparation(schools),
+      this._applyCohesion(schools),
+      this._applyWander()
+    ]
     const steeringForce = new THREE.Vector3(0, 0, 0)
 
     for (const f of forces) {
@@ -141,6 +161,7 @@ class Fish extends Entities {
       steeringForce.multiplyScalar(this._maxSteeringForce)
     }
 
+    // if (this._id == 1) console.log(steeringForce)
     this._velocity.add(steeringForce)
 
     if (this._velocity.length() > this._maxSpeed) {

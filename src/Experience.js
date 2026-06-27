@@ -1,5 +1,6 @@
 import States from "./States";
 import Graphics from "./Graphics";
+import Stats from "three/examples/jsm/libs/stats.module.js";
 
 let instance = null;
 
@@ -13,6 +14,10 @@ export default class Experience {
     this.canvas = canvas;
     this.resources = {}
     this.started = false;
+
+    this.stats = new Stats()
+    document.body.appendChild(this.stats.dom);
+
     this.fishes = []
     // non-fish object
     this.entities = []
@@ -48,6 +53,7 @@ export default class Experience {
   }
   update() {
     const delta = this.states.time.delta
+    this.stats.update()
 
     for (let e = 0; e < this.entities.length; e++) {
       const entity = this.entities[e]

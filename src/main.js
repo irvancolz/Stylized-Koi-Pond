@@ -26,6 +26,7 @@ const canvas = document.getElementById("canvas");
 const debug = new Debugger()
 const experience = new Experience(canvas, debug);
 
+
 const FISH_CONFIG = {
   maxSpeed: .01,
   maxSteering: .01
