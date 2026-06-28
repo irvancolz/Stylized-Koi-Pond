@@ -11,6 +11,7 @@ const vertexShaderPar = `
   uniform float uTime;
   uniform float uElevation;
   uniform sampler2D uGrassHeightTex;
+  uniform sampler2D uGrassNormalTex;
 
   varying vec3 vColor;
   varying vec2 vWorldUv;
@@ -55,14 +56,6 @@ const vertexShaderPar = `
     return 2.3 * n_xy;
   }
 
-  #define WORLD_DIAMETER 40.
-
-  vec2 getWorldUV(vec2 worldPos) {
-      vec2 pos = worldPos + vec2(.5 * WORLD_DIAMETER);
-
-      return fract(pos / vec2(WORLD_DIAMETER));
-  }
-
   vec2 getRotatePivot2d(vec2 uv, float rotation, vec2 pivot) {
     return vec2(cos(rotation) * (uv.x - pivot.x) + sin(rotation) * (uv.y - pivot.y) + pivot.x, cos(rotation) * (uv.y - pivot.y) - sin(rotation) * (uv.x - pivot.x) + pivot.y);
   }
@@ -79,9 +72,7 @@ const vertexShaderMain = `
     vec4 worldPos = modelMatrix * vec4(position, 1.);
     worldPos.xz += newCenter;
 
-    vec2 worldUv = getWorldUV(worldPos.xz);
-    
-    float h = texture2D(uGrassHeightTex, worldUv).r;
+    float h = texture2D(uGrassHeightTex, uv).r;
     transformed.xyz *= h;
     
     vec4 modelCenter = modelMatrix * vec4(newCenter.x, 0.0, newCenter.y, 1.0);
@@ -90,10 +81,10 @@ const vertexShaderMain = `
     vec4 modelPosition = modelMatrix * vec4(transformed, 1.);
     modelPosition.xz += newCenter;
 
-    float noise = cnoise(worldUv * 4.);
+    float noise = cnoise(uv * 4.);
 
     float displacement = sin(uTime * .002 + noise * 10.) * color.r;
-    displacement *= .12;
+    displacement *= .12 * h;
     modelPosition.x += displacement;
     modelPosition.z += displacement;
 
@@ -107,7 +98,8 @@ const vertexShaderMain = `
 
 
     vColor = color;
-    vWorldUv = worldUv;
+    vNormal = texture2D( uGrassNormalTex, uv * 1. ).rgb;
+    vWorldUv = uv;
 
   `
 
@@ -124,7 +116,7 @@ const fragmentShaderPar = `
 `
 
 const fragmentShaderMain = `
-    vec4 diffuseColor = vec4( diffuse, opacity );
+    #include <color_fragment>
 
     float grassh = texture2D(uGrassHeightTex, vWorldUv).r;
     if(grassh <= 0.2) discard;
@@ -133,6 +125,7 @@ const fragmentShaderMain = `
     ci = 1. - pow(ci, 6.);
 
     vec3 color = mix(uGroundColor, uColor, ci);
+    // color = vNormal;
 
     diffuseColor.rgb = color;
 
@@ -142,7 +135,7 @@ export default class Grass extends Entities {
   constructor() {
     super()
 
-    this.density = 100;
+    this.density = 150;
     // made it slightly smaller than the world
     this.width = 39;
     this.count = this.density * this.width ** 2;
@@ -175,7 +168,8 @@ export default class Grass extends Entities {
       uGroundColor: new THREE.Uniform(new THREE.Color(this.debugConfig.ground)),
       uTime: new THREE.Uniform(0),
       uElevation: new THREE.Uniform(1.4),
-      uGrassHeightTex: new THREE.Uniform()
+      uGrassHeightTex: new THREE.Uniform(),
+      uGrassNormalTex: new THREE.Uniform()
     };
     this.material = new THREE.MeshToonMaterial({
       side: THREE.DoubleSide,
@@ -187,7 +181,7 @@ export default class Grass extends Entities {
       shader.vertexShader = shader.vertexShader.replace('#include <project_vertex>', vertexShaderMain)
 
       shader.fragmentShader = shader.fragmentShader.replace('#include <common>', fragmentShaderPar)
-      shader.fragmentShader = shader.fragmentShader.replace('vec4 diffuseColor = vec4( diffuse, opacity );', fragmentShaderMain)
+      shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>', fragmentShaderMain)
     }
   }
 
@@ -252,15 +246,17 @@ export default class Grass extends Entities {
   }
 
   init() {
-    this.initMaterial();
-    this.initGeometry();
+    this.initMaterial()
+    this.initGeometry()
 
     this.uniforms.uGrassHeightTex.value = this.Resources['grass_height']
+    this.uniforms.uGrassNormalTex.value = this.Resources['grass_normal']
 
     this.mesh = new THREE.Mesh(this.geometry, this.material);
     this.mesh.frustumCulled = false;
     this.mesh.receiveShadow = true;
     this.mesh.castShadow = true;
+
 
     this.Graphics.Scene.add(this.mesh);
   }
@@ -292,14 +288,6 @@ export default class Grass extends Entities {
       if (!e.last) return;
       this.reset();
     });
-    // f.addBinding(this, "width", {
-    //   min: 1,
-    //   max: 128,
-    //   step: 10,
-    // }).on("change", (e) => {
-    //   if (!e.last) return;
-    //   this.reset();
-    // });
   }
 
   reset() {
@@ -310,9 +298,8 @@ export default class Grass extends Entities {
     this.centersArray = [];
     this.Graphics.Scene.remove(this.mesh);
     this.geometry.dispose();
-    this.material.dispose();
 
-    this.init(false);
+    this.init()
   }
 
   update() {

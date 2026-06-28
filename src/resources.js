@@ -75,6 +75,15 @@ const textures = [
     path: './texture/leaves.png',
   },
   {
+    name: 'grass_normal',
+    type: 'texture',
+    path: './texture/grass_normal.png',
+    onLoaded: (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace
+      tex.flipY = false
+    }
+  },
+  {
     name: 'koi_pattern_01',
     type: 'texture',
     path: './texture/KoiPattern01.jpg',
