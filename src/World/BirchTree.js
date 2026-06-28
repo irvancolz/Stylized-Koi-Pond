@@ -115,7 +115,6 @@ export class BirchTree extends Entities {
 
     this._foliages.material = new THREE.MeshToonMaterial({
       alphaTest: .5,
-      depthWrite: false,
       transparent: true,
       side: THREE.DoubleSide,
       color: this._foliages.color,
@@ -126,6 +125,11 @@ export class BirchTree extends Entities {
       shader.uniforms = { ...shader.uniforms, ...this._uniforms }
       shader.vertexShader = shader.vertexShader.replace('#include <common>', foliagesVertPar)
       shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', foliagesVertMain)
+      shader.fragmentShader = shader.fragmentShader.replace('#include <alphatest_fragment>', `
+          #include <alphatest_fragment>
+
+          diffuseColor.a = 1.;
+        `)
     }
 
     this._foliages.geometry = bushes.createGeometry(sections)
@@ -144,7 +148,6 @@ export class BirchTree extends Entities {
       shader.vertexShader = shader.vertexShader.replace('#include <common>', foliagesVertPar)
       shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', foliagesVertMain)
     }
-    // this._mesh.position.copy(this._position)
 
     this.Graphics.Scene.add(this._foliages.mesh)
 
@@ -195,6 +198,7 @@ export class BirchTree extends Entities {
     })
 
     const leaves = root.addFolder({ title: 'leaves' })
+    leaves.addBinding(this._foliages.mesh.material, 'depthWrite')
     leaves.addBinding(this._foliages, 'color').on('change', () => {
       this._foliages.mesh.material.color.set(new THREE.Color(this._foliages.color))
     })
