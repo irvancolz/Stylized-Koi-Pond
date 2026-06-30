@@ -52,6 +52,11 @@ const models = [
     path: './model/BirchTree.glb'
   },
   {
+    name: 'koinobori_model',
+    type: 'gltfModel',
+    path: './model/Koinobori.glb'
+  },
+  {
     name: 'waterfall_model',
     type: 'gltfModel',
     path: './model/Waterfall.glb'
@@ -138,6 +143,44 @@ const textures = [
       tex.flipY = false
     }
   },
+  {
+    name: 'koinobori_01',
+    type: 'texture',
+    path: './texture/KoinoboriPattern01.jpg',
+    onLoaded: (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace
+      tex.flipY = false
+    }
+  },
+  {
+    name: 'koinobori_02',
+    type: 'texture',
+    path: './texture/KoinoboriPattern02.jpg',
+    onLoaded: (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace
+      tex.flipY = false
+    }
+  },
+  {
+    name: 'koinobori_03',
+    type: 'texture',
+    path: './texture/KoinoboriPattern03.jpg',
+    onLoaded: (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace
+      tex.flipY = false
+    }
+  },
+  {
+    name: 'koinobori_04',
+    type: 'texture',
+    path: './texture/KoinoboriPattern04.jpg',
+    onLoaded: (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace
+      tex.flipY = false
+    }
+  },
+
+
 ]
 
 export default [...models, ...textures]

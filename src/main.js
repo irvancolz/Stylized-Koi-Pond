@@ -19,6 +19,8 @@ import TallGrass from "./World/TallGrass";
 import Stones from "./World/Stones";
 import Bushes from "./World/Bushes";
 import Grass from "./World/Grass";
+import Starter from "./World/Starter";
+import Koinobori from "./World/Koinobori";
 
 const loading = new Loading()
 
@@ -86,6 +88,12 @@ const birchTreeReffs = seed.filter(el => el.name.toLowerCase().includes('birchtr
 const birchTree = new BirchTree(birchTreeReffs)
 // experience.addEntity(birchTree);
 
+const koinoboriReffs = seed.filter(el => el.name.toLowerCase().includes('koinobori'))
+const koinobori = new Koinobori(koinoboriReffs)
+
+// const starter = new Starter()
+// experience.addEntity(starter)
+
 const objects = [
   grass,
   ground,
@@ -97,7 +105,8 @@ const objects = [
   lotusleaves,
   water,
   waterfall,
-  tallgrass
+  tallgrass,
+  koinobori
 ]
 
 experience.addEntity(objects)

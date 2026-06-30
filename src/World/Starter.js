@@ -7,7 +7,7 @@ class Starter extends Entities {
   }
 
   init() {
-    this._model = this.Resources["world_model"]
+    this._model = this.Resources["koinobori_model"]
     this._model.scene.traverse(e => {
       if (e.isMesh) {
         e.material.side = THREE.DoubleSide
@@ -15,6 +15,8 @@ class Starter extends Entities {
         e.receiveShadow = true
       }
     })
+    this._model.scene.position.y = 5
+    this._model.scene.rotateX(Math.PI)
 
     this.ground = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: '#ffffff' }))
     this.ground.receiveShadow = true

@@ -293,9 +293,6 @@ class Fish extends Entities {
   }
 
   dispose() {
-    // idk, no time to debug
-
-    if (!this.Graphics) return
 
     this.Graphics.Scene.remove(this._mesh)
     this._mesh.traverse(el => {
