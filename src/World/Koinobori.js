@@ -15,8 +15,8 @@ export default class Koinobori extends Entities {
 
     this._uniforms = {
       uTime: new THREE.Uniform(0),
-      uWindPower: new THREE.Uniform(.2),
-      uWindSpeed: new THREE.Uniform(.002)
+      uWindPower: new THREE.Uniform(.3),
+      uWindSpeed: new THREE.Uniform(.0037)
     }
 
     this._material = new THREE.MeshStandardMaterial({
@@ -115,6 +115,7 @@ export default class Koinobori extends Entities {
 
       const reff = this._reffs[i]
       mesh.position.copy(new THREE.Vector3(...reff.translation))
+      mesh.quaternion.copy(new THREE.Quaternion(...reff.rotation))
 
       mesh.castShadow = true
       mesh.receiveShadow = true
