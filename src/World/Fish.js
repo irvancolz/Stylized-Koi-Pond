@@ -4,7 +4,7 @@ import { math } from '../Utils/math';
 import { SkeletonUtils } from 'three/examples/jsm/Addons.js';
 
 const TURN_ANIMATION_INTENSITY_MIN = .001
-const SPREAD = 9
+const SPREAD = 12
 let id = 0
 
 class Fish extends Entities {
@@ -127,7 +127,7 @@ class Fish extends Entities {
     this._wanderAngle += 1;
     const angle = this._wanderAngle * .05;
 
-    const rot = new THREE.Vector3(0, Math.sin(angle) * .03, 0)
+    const rot = new THREE.Vector3(0, Math.cos(angle) * .03, 0)
     const dir = new THREE.Euler().setFromVector3(rot)
     const force = this._velocity.clone()
     force.applyEuler(dir)
@@ -232,7 +232,7 @@ class Fish extends Entities {
         this._bones[b].bones.rotation.setFromVector3(currVec, this._bones[b].rest.order)
 
       } else {
-        this._bones[b].bones.rotation.z = Math.sin(elapsed * .005 + this._offset) * -.1
+        this._bones[b].bones.rotation.z = Math.sin(elapsed * .006 + this._offset) * .2
       }
       if (intensity >= TURN_ANIMATION_INTENSITY_MIN) {
 
