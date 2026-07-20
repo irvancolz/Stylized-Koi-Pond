@@ -65,21 +65,20 @@ const vertexShaderPar = `
 
 const vertexShaderMain = `
     #include <project_vertex>
-    // vec4 mvPosition = vec4( transformed, 1.0 );
     transformed = position;
 
     vec2 newCenter = aCenter;
-    vec4 worldPos = modelMatrix * vec4(position, 1.);
-    worldPos.xz += newCenter;
 
     float h = texture2D(uGrassHeightTex, uv).r;
+    // weird i said, but i forgot how i done it before.
+    transformed.xz -= newCenter;
     transformed.xyz *= h;
-    
+    transformed.xz += newCenter;
+
     vec4 modelCenter = modelMatrix * vec4(newCenter.x, 0.0, newCenter.y, 1.0);
 
     transformed.y += uElevation;
     vec4 modelPosition = modelMatrix * vec4(transformed, 1.);
-    modelPosition.xz += newCenter;
 
     float noise = cnoise(uv * 4.);
 
@@ -171,6 +170,7 @@ export default class Grass extends Entities {
       uGrassHeightTex: new THREE.Uniform(),
       uGrassNormalTex: new THREE.Uniform()
     };
+
     this.material = new THREE.MeshToonMaterial({
       side: THREE.DoubleSide,
     });
@@ -182,6 +182,23 @@ export default class Grass extends Entities {
 
       shader.fragmentShader = shader.fragmentShader.replace('#include <common>', fragmentShaderPar)
       shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>', fragmentShaderMain)
+    }
+
+    this.depthMaterial = new THREE.MeshDepthMaterial({
+      depthPacking: THREE.RGBADepthPacking
+    });
+    this.depthMaterial.onBeforeCompile = shader => {
+      shader.uniforms = { ...shader.uniforms, ...this.uniforms }
+
+      shader.vertexShader = shader.vertexShader.replace('#include <common>', vertexShaderPar)
+      shader.vertexShader = shader.vertexShader.replace('#include <common>', `
+        #include <common>
+
+        varying vec3 vUv;
+        varying vec3 vNormal;
+
+        `)
+      shader.vertexShader = shader.vertexShader.replace('#include <project_vertex>', vertexShaderMain)
     }
   }
 
@@ -206,7 +223,7 @@ export default class Grass extends Entities {
             this.convertRange(center.z, SURFACE_MIN, SURFACE_MAX, 0, 1),
           ];
 
-          const blade = this.generateBlade(i * VERT_PER_BLADE, uv);
+          const blade = this.generateBlade(i * VERT_PER_BLADE, uv, center);
           blade.verts.forEach((vert) => {
             this.positionsArray.push(...vert.pos);
             this.uvsArray.push(...vert.uv);
@@ -253,6 +270,7 @@ export default class Grass extends Entities {
     this.uniforms.uGrassNormalTex.value = this.Resources['grass_normal']
 
     this.mesh = new THREE.Mesh(this.geometry, this.material);
+    this.mesh.customDepthMaterial = this.depthMaterial
     this.mesh.frustumCulled = false;
     this.mesh.receiveShadow = true;
     this.mesh.castShadow = true;
@@ -315,7 +333,7 @@ export default class Grass extends Entities {
     this.geometry.dispose();
   }
 
-  generateBlade(vArrOffset, uv) {
+  generateBlade(vArrOffset, uv, center) {
     const rand = math.random(vArrOffset);
 
     const MID_WIDTH = this.BLADE_WIDTH * 1.75;
@@ -334,15 +352,15 @@ export default class Grass extends Entities {
     // Find the Bottom Left, Bottom Right, Top Left, Top right, Top Center vertex positions
     const bl = new THREE.Vector3()
       .copy(yawUnitVec)
-      .multiplyScalar((this.BLADE_WIDTH / 2) * 1);
+      .multiplyScalar((this.BLADE_WIDTH / 2) * 1).add(center);
 
     const br = new THREE.Vector3()
       .copy(yawUnitVec)
-      .multiplyScalar((this.BLADE_WIDTH / 2) * -1);
+      .multiplyScalar((this.BLADE_WIDTH / 2) * -1).add(center);
 
     const tc = new THREE.Vector3()
       .add(tipBendUnitVec)
-      .multiplyScalar(TIP_OFFSET);
+      .multiplyScalar(TIP_OFFSET).add(center);
 
     tc.y += height;
 
